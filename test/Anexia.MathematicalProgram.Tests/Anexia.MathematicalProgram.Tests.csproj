@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+
+        <IsPackable>false</IsPackable>
+
+        <AssemblyName>Anexia.MathematicalProgram.Tests</AssemblyName>
+
+        <RootNamespace>Anexia.MathematicalProgram.Tests</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Anexia.MathematicalProgram\Anexia.MathematicalProgram.csproj"/>
+    </ItemGroup>
+
+</Project>
