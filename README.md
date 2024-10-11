@@ -1,4 +1,8 @@
 # dotnet-mathematical-program
+==========
+
+[![](https://img.shields.io/nuget/v/Anexia.MathematicalProgram "NuGet version badge")](https://www.nuget.org/packages/Anexia.MathematicalProgram)
+[![](https://github.com/anexia/dotnetcore-mathematical-program/actions/workflows/test.yml/badge.svg?branch=main "Test status")](https://github.com/anexia/dotnetcore-mathematical-program/actions/workflows/test.yml)
 
 This library allows you to build and solve linear programs and integer linear programs in a very handy way.
 The implementation uses Google´s GLOP linear solver for linear programs and optionally, the Coin-OR CBC branch and cut
