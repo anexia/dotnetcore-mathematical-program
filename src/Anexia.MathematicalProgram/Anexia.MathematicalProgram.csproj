@@ -14,6 +14,7 @@
         <Company>ANEXIA Internetdienstleistungs GmbH</Company>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/anexia/dotnetcore-mathematical-program/</PackageProjectUrl>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
