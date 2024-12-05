@@ -43,12 +43,12 @@ For solving an LP you may initialize the `LinearProgramSolver` which uses the GL
   The `out`parameter of this method is of type `Google.OrTools.LinearSolver.Variable`.
 - **Constraints:** Via `LinearProgramSolver.AddConstraints()` you can simply add your beforehand initialized
   contraints to the solver.
-- **Objective:** Via `LinearProgramSolver.AddObjective()` you can add your objective in form of the `Terms`
+- **Objective:** Via `LinearProgramSolver.SetObjective()` you can add your objective in form of the `Terms`
   and a `Constant` to the solver.
   With a `bool` you can choose if the LP should be `minimized` or `maximized`.
 - **Solve:** Via `LinearProgramSolver.Solve()` you either
-    - obtain a `SolverResult` (explained below) or
-    - a `MathematicalProgramException` with a detailed message on the occured problem is thrown.
+  - obtain a `SolverResult` (explained below) or
+  - a `MathematicalProgramException` with a detailed message on the occured problem is thrown.
 
 #### Integer Linear Programming
 
@@ -78,10 +78,10 @@ After solving the LP/ILP you get a `SolverResult` according to the `Google.OrToo
 The `SolverResult` containts following information:
 
 - **Solver:** This is the already solved `Google.OrTools.LinearSolver.Solver`.
-    - You have the opportunity to log the LP/ILP model in a human readable format by `Solver.ExportModelAsLpFormat()`.
-    - You can read out the actual values of the variables via `Google.OrTools.LinearSolver.Variable.SolutionValue()`
-      to transform the result correctly.
-    - As soon as the solved solver is not needed any more, it should be removed via `Solver.Dispose()`.
+  - You have the opportunity to log the LP/ILP model in a human readable format by `Solver.ExportModelAsLpFormat()`.
+  - You can read out the actual values of the variables via `Google.OrTools.LinearSolver.Variable.SolutionValue()`
+    to transform the result correctly.
+  - As soon as the solved solver is not needed any more, it should be removed via `Solver.Dispose()`.
 - **ObjectiveValue:** Actual objective value. This value can be either the optimum, a deviation of the optimum
   if the LP/ILP was not entirely solved, or `double.NaN` if the LP/ILP is infeasible.
 - **IsFeasible:** Information whether the LP/ILP is generally feasible.
@@ -100,11 +100,11 @@ The `SolverResult` containts following information:
 - Result: x = 2, objective value = 2
 
 ```
-var solver = new LinearProgramSolver().SetSolverConfigurations(TimeLimitInMilliseconds.Unbounded);
+var solver = new LinearProgramSolver();
 
 solver = solver.AddContinuousVariable(new Interval(double.NegativeInfinity, 5), "TestVariable", out var testVariable);
 
-solver = solver.AddObjective(new Terms(new Term(new Coefficient(1), testVariable)), false);
+solver = solver.SetObjective(new Terms(new Term(new Coefficient(1), testVariable)), false);
 
 var constraints = new Constraints(
             new Constraint(new Terms(new Term(new Coefficient(1), testVariable)),
@@ -126,16 +126,15 @@ Logger.Information(result.SolvedSolver.ExportModelAsLpFormat(false));
 
 ```
 var solver = new IntegerLinearProgramSolver()
-            .SetSolverConfigurations(new TimeLimitInMilliseconds(10), 2, true)
             .AddIntegerVariable(new Interval(1, 3), "VariableX", out var variableX)
             .AddIntegerVariable(new Interval(0, 1), "VariableY", out var variableY)
-            .AddObjective(
+            .SetObjective(
                 new Terms(new Term(new Coefficient(2), variableX), new Term(new Coefficient(1), variableY)), true)
             .AddConstraints(new Constraints(new Constraint(
                     new Terms(new Term(new Coefficient(1), variableX), new Term(new Coefficient(-1), variableY)),
                     new Interval(0, double.PositiveInfinity))));
 
- var result = solver.Solve();
+ var result = solver.Solve(new SolverParameter(true, RelativeGap.EMinus7,new TimeLimitInMilliseconds(10), new NumberOfThreads(2)));
 ```
 
 ### Example 3 (Build and solve ILP)
@@ -144,13 +143,12 @@ var solver = new IntegerLinearProgramSolver()
 
 ```
 var solver = new IntegerLinearProgramSolver()
-            .SetSolverConfigurations(TimeLimitInMilliseconds.Unbounded, 2, true)
             .AddIntegerVariable(Interval.BinaryInterval, "TestVariable", out var testVariable)
-            .AddObjective(new Terms(new Term(new Coefficient(2), testVariable)), false)
+            .SetObjective(new Terms(new Term(new Coefficient(2), testVariable)), false)
             .AddConstraints(
                 new Constraints(new Constraint(new Terms(new Term(new Coefficient(1), testVariable)), new Point(3))));
 
- var result = solver.Solve();
+ var result = solver.Solve(new SolverParameter(true, RelativeGap.EMinus7));
 
  Logger.Information(result.SolvedSolver.ExportModelAsLpFormat(false));
 ```

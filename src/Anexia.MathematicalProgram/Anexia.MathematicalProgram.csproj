@@ -15,8 +15,8 @@
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/anexia/dotnetcore-mathematical-program/</PackageProjectUrl>
     </PropertyGroup>
-    
+
     <ItemGroup>
-        <None Include="$(MSBuildProjectDirectory)/../../README.md" Pack="true" PackagePath="" />
+        <None Include="$(MSBuildProjectDirectory)/../../README.md" Pack="true" PackagePath="/"/>
     </ItemGroup>
 </Project>
