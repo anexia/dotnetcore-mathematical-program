@@ -69,7 +69,15 @@ public sealed class IntegerLinearProgramSolver : MemberwiseEquatable<IntegerLine
             : IlpSolverType.CbcMixedIntegerProgramming;
 
     private Solver Solver { get; }
-    private IlpSolverType SolverType { get; }
+    
+    /// <summary>
+    /// Returns the type of the solver selected for solving the integer linear programs.
+    /// </summary>
+    /// <returns>The type of the solver.</returns>
+    /// <remarks>
+    /// Supported solvers are defined in the <see cref="IlpSolverType"/> enumeration.
+    /// </remarks>
+    public IlpSolverType SolverType { get; }
 
     /// <summary>
     /// Returns the model in LP format.
