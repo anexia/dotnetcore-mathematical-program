@@ -8,6 +8,9 @@
 
 using System.Collections;
 using System.Collections.Immutable;
+using System.Diagnostics.Metrics;
+using Google.OrTools.ConstraintSolver;
+using Google.OrTools.LinearSolver;
 
 #endregion
 
@@ -16,15 +19,16 @@ namespace Anexia.MathematicalProgram.Model;
 /// <summary>
 /// Represents a set of terms.
 /// </summary>
-/// <param name="elements">A set of terms.</param>
-public sealed class Terms(ImmutableHashSet<Term> elements) : IEquatable<Terms>, IEnumerable<Term>
+/// <param name="elements">A dictionary of variable - coefficient pairs.</param>
+public sealed class Terms(ImmutableDictionary<Variable, Coefficient> elements) : IEquatable<Terms>, IEnumerable<Term>
 {
     /// <summary>
     /// Initializes a new instance of <see cref="Terms"/> with given terms.
     /// </summary>
     /// <param name="elements">An enumerable of terms.</param>
     public Terms(IEnumerable<Term> elements)
-        : this(elements.ToImmutableHashSet())
+        : this(elements.GroupBy(term => term.Variable).ToImmutableDictionary(key => key.Key,
+            value => new Coefficient(value.Sum(item => item.Coefficient.Value))))
     {
     }
 
@@ -50,7 +54,16 @@ public sealed class Terms(ImmutableHashSet<Term> elements) : IEquatable<Terms>, 
     {
         if (other is null) return false;
 
-        return ReferenceEquals(this, other) || Elements.SequenceEqual(other.Elements);
+        if (ReferenceEquals(this, other)) return true;
+        if (Elements.Count != other.Count())
+            return false;
+
+        foreach (var (key, value) in Elements)
+        {
+            if (!other.Elements.TryGetValue(key, out var val) || !value.Equals(val)) return false;
+        }
+
+        return true;
     }
 
     /// <inheritdoc />
@@ -59,17 +72,22 @@ public sealed class Terms(ImmutableHashSet<Term> elements) : IEquatable<Terms>, 
     /// <inheritdoc />
     public override int GetHashCode() => Elements.GetHashCode();
 
-    private ImmutableHashSet<Term> Elements { get; } = elements;
+    private ImmutableDictionary<Variable, Coefficient> Elements { get; } = elements;
 
     /// <summary>
-    /// Adds the given term to the end of the immutable list.
+    /// Adds the given term to the dictionary. If the term's variable already exists, the new coefficient gets added to the old.
     /// </summary>
     /// <param name="term">The term to be added.</param>
     /// <returns>A new object with the term added.</returns>
-    public Terms Add(Term term) => new(Elements.Add(term));
+    public Terms Add(Term term) =>
+        Elements.TryGetValue(term.Variable, out var coefficient)
+            ? new(Elements.SetItem(term.Variable, new(coefficient.Value + term.Coefficient.Value)))
+            : new(Elements.Add(term.Variable, term.Coefficient));
+
+    public IEnumerable<KeyValuePair<Variable, Coefficient>> KeyValuePairs => Elements;
 
     /// <inheritdoc />
-    public IEnumerator<Term> GetEnumerator() => Elements.GetEnumerator();
+    public IEnumerator<Term> GetEnumerator() => Elements.Select(pair => new Term(pair.Value, pair.Key)).GetEnumerator();
 
     /// <inheritdoc />
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
