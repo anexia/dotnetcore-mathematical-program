@@ -23,6 +23,14 @@ namespace Anexia.MathematicalProgram.Tests.Solve;
 public sealed class IntegerLinearSolverTest
 {
     [Fact]
+    public void SolverReturnsCorrectIlpSolverType()
+    {
+        var solver = new IntegerLinearProgramSolver();
+
+        Assert.Equal(IlpSolverType.CbcMixedIntegerProgramming, solver.SolverType);
+    }
+    
+    [Fact]
     public void SolverWithoutObjectiveAndConstraintsReturnsCorrectResult()
     {
         var result = new IntegerLinearProgramSolver().Solve();
