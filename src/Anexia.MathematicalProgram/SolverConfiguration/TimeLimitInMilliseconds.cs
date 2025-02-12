@@ -4,6 +4,8 @@
 //  </copyright>
 //  ------------------------------------------------------------------------------------------
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Anexia.MathematicalProgram.SolverConfiguration;
 
 /// <summary>
@@ -13,7 +15,9 @@ namespace Anexia.MathematicalProgram.SolverConfiguration;
 public sealed class TimeLimitInMilliseconds(uint value) : MemberwiseEquatable<TimeLimitInMilliseconds>
 {
     public uint Value { get; } = value;
+    public uint AsSeconds => Value / 1000;
 
     /// <inderitdoc />
+    [ExcludeFromCodeCoverage]
     public override string ToString() => $"{nameof(Value)}: {Value}";
 }

@@ -1,20 +1,23 @@
-﻿// ------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------
 //  <copyright file = "ConstraintFactory.cs" company = "ANEXIA® Internetdienstleistungs GmbH">
-//  Copyright (c) ANEXIA® Internetdienstleistungs GmbH.All rights reserved.
+//  Copyright (c) ANEXIA® Internetdienstleistungs GmbH. All rights reserved.
 //  </copyright>
-//  ------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------
 
-#region
-
-using Anexia.MathematicalProgram.Model;
-
-#endregion
+using Anexia.MathematicalProgram.Model.Expression;
+using Anexia.MathematicalProgram.Model.Interval;
+using Anexia.MathematicalProgram.Model.Scalar;
+using Anexia.MathematicalProgram.Model.Variable;
 
 namespace Anexia.MathematicalProgram.Tests.Factory;
 
-internal static class ConstraintFactory
+public static class ConstraintFactory
 {
-    public static Constraint Constraint(Term[] terms, IInterval interval) => new(new Terms(terms), interval);
+    internal static Constraints<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar> Constraints(
+        params IConstraint<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar>[] constraints) =>
+        new(constraints);
 
-    public static Constraints Constraints(params Constraint[] constraints) => new(constraints);
+    internal static Constraint<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar> Constraint(
+        IWeightedSum<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar> weightedSum,
+        IInterval<IRealScalar> interval) => new(weightedSum, interval);
 }

@@ -4,6 +4,8 @@
 //  </copyright>
 //  ------------------------------------------------------------------------------------------
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Anexia.MathematicalProgram.Result;
 
 /// <summary>
@@ -18,5 +20,6 @@ public sealed class IsOptimal(bool value) : MemberwiseEquatable<IsOptimal>
     public bool Value { get; } = value;
 
     /// <inheritdoc />
+    [ExcludeFromCodeCoverage]
     public override string ToString() => $"{Value}";
 }

@@ -4,57 +4,114 @@
 //  </copyright>
 //  ------------------------------------------------------------------------------------------
 
-#region
 
+using System.Collections.ObjectModel;
+using Anexia.MathematicalProgram.Model.Scalar;
+using Anexia.MathematicalProgram.Model.Variable;
 using Anexia.MathematicalProgram.Solve;
-using Google.OrTools.LinearSolver;
-
-#endregion
+using Google.OrTools.ModelBuilder;
+using Google.OrTools.Sat;
 
 namespace Anexia.MathematicalProgram.Result;
 
-internal sealed class ResultHandling(Solver solver) : MemberwiseEquatable<ResultHandling>
+internal static class ResultHandling
 {
-    private Solver Solver { get; } = solver;
-
-    internal SolverResult Handle(Solver.ResultStatus resultStatus)
+    internal static ISolverResult<TVariable, TCoefficient, TVariableInterval>
+        Handle<TVariable, TCoefficient, TVariableInterval>(SolveStatus resultStatus,
+            bool switchedToDefaultSolver,
+            ISolutionValues<TVariable, TCoefficient, TVariableInterval>? solutionValues = null,
+            double? objectiveValue = null,
+            double? bestBound = null) where TVariable : IVariable<TVariableInterval>
+        where TVariableInterval : IAddableScalar<TVariableInterval, TVariableInterval>
     {
-        switch (resultStatus)
+        return resultStatus switch
         {
-            case Solver.ResultStatus.OPTIMAL:
-                return new SolverResult(Solver,
-                    new ObjectiveValue(Solver.Objective().Value()),
-                    new IsFeasible(true),
-                    new IsOptimal(true),
-                    new OptimalityGap(0));
-            case Solver.ResultStatus.FEASIBLE:
-                var objective = Solver.Objective();
-                var objectiveValue = objective.Value();
-
-                return new SolverResult(Solver,
-                    new ObjectiveValue(objectiveValue),
-                    new IsFeasible(true),
-                    new IsOptimal(false),
-                    new OptimalityGap(Math.Abs(objective.BestBound() - objectiveValue) / objectiveValue));
-            case Solver.ResultStatus.INFEASIBLE:
-                return new SolverResult(Solver,
-                    new ObjectiveValue(double.NaN),
-                    new IsFeasible(false),
-                    new IsOptimal(false),
-                    new OptimalityGap(double.NaN));
-            case Solver.ResultStatus.UNBOUNDED:
-                throw new MathematicalProgramException("Mathematical program is unbounded.");
-            case Solver.ResultStatus.ABNORMAL:
-                throw new MathematicalProgramException("Mathematical program is abnormal (probably numerical error).");
-            case Solver.ResultStatus.NOT_SOLVED:
-                throw new MathematicalProgramException("Mathematical program could not be diagnosed and solved.");
-            case Solver.ResultStatus.MODEL_INVALID:
-                throw new MathematicalProgramException("Mathematical model is not valid.");
-            default:
-                throw new MathematicalProgramException("Unknown result status in linear solver.");
-        }
+            SolveStatus.OPTIMAL => objectiveValue is null
+                ? throw new MathematicalProgramException("Mathematical program could not be solved.")
+                : SolverResult(SolverResultStatus.Optimal, switchedToDefaultSolver, solutionValues, objectiveValue,
+                    bestBound, true, true),
+            SolveStatus.FEASIBLE => objectiveValue is null
+                ? throw new MathematicalProgramException("Mathematical program could not be solved.")
+                : SolverResult(SolverResultStatus.Feasible, switchedToDefaultSolver, solutionValues, objectiveValue,
+                    bestBound, true),
+            SolveStatus.INFEASIBLE => SolverResult<TVariable, TCoefficient, TVariableInterval>(
+                SolverResultStatus.Infeasible, switchedToDefaultSolver),
+            SolveStatus.UNBOUNDED => SolverResult<TVariable, TCoefficient, TVariableInterval>(
+                SolverResultStatus.Unbounded, switchedToDefaultSolver),
+            SolveStatus.ABNORMAL => SolverResult<TVariable, TCoefficient, TVariableInterval>(
+                SolverResultStatus.Abnormal, switchedToDefaultSolver),
+            SolveStatus.NOT_SOLVED => SolverResult<TVariable, TCoefficient, TVariableInterval>(
+                SolverResultStatus.NotSolved, switchedToDefaultSolver),
+            SolveStatus.MODEL_INVALID => SolverResult<TVariable, TCoefficient, TVariableInterval>(
+                SolverResultStatus.ModelInvalid, switchedToDefaultSolver),
+            SolveStatus.MODEL_IS_VALID => SolverResult<TVariable, TCoefficient, TVariableInterval>(
+                SolverResultStatus.ModelIsValid, switchedToDefaultSolver),
+            SolveStatus.CANCELLED_BY_USER => SolverResult<TVariable, TCoefficient, TVariableInterval>(
+                SolverResultStatus.CancelledByUser, switchedToDefaultSolver),
+            SolveStatus.UNKNOWN_STATUS => SolverResult<TVariable, TCoefficient, TVariableInterval>(
+                SolverResultStatus.UnknownStatus, switchedToDefaultSolver),
+            SolveStatus.INVALID_SOLVER_PARAMETERS => SolverResult<TVariable, TCoefficient, TVariableInterval>(
+                SolverResultStatus.InvalidSolverParameters, switchedToDefaultSolver),
+            SolveStatus.SOLVER_TYPE_UNAVAILABLE => SolverResult<TVariable, TCoefficient, TVariableInterval>(
+                SolverResultStatus.SolverTypeUnavailable, switchedToDefaultSolver),
+            SolveStatus.INCOMPATIBLE_OPTIONS => SolverResult<TVariable, TCoefficient, TVariableInterval>(
+                SolverResultStatus.IncompatibleOptions, switchedToDefaultSolver),
+            _ => throw new MathematicalProgramException($"Unknown result status in solver. {resultStatus}")
+        };
     }
 
-    /// <inheritdoc />
-    public override string ToString() => $"{nameof(Solver)}: {Solver}";
+    internal static ISolverResult<TVariable, TCoefficient, TVariableInterval> Handle<TVariable, TCoefficient,
+        TVariableInterval>(CpSolverStatus resultStatus,
+        ISolutionValues<TVariable, TCoefficient, TVariableInterval>? solutionValues = null,
+        double? objectiveValue = null,
+        double? bestBound = null) where TVariableInterval : IAddableScalar<TVariableInterval, TVariableInterval>
+        where TVariable : IVariable<TVariableInterval>
+    {
+        return resultStatus switch
+        {
+            CpSolverStatus.Optimal => objectiveValue is null || bestBound is null
+                ? throw new MathematicalProgramException("Mathematical program could not be solved.")
+                : SolverResult(SolverResultStatus.Optimal, false, solutionValues, objectiveValue,
+                    bestBound, true, true),
+            CpSolverStatus.Feasible => objectiveValue is null || bestBound is null
+                ? throw new MathematicalProgramException("Mathematical program could not be solved.")
+                : SolverResult(SolverResultStatus.Feasible, false, solutionValues, objectiveValue,
+                    bestBound, true),
+            CpSolverStatus.Infeasible =>
+                SolverResult<TVariable, TCoefficient, TVariableInterval>(SolverResultStatus.Infeasible,
+                    false),
+            CpSolverStatus.Unknown => SolverResult<TVariable, TCoefficient, TVariableInterval>(
+                SolverResultStatus.UnknownStatus,
+                false),
+            CpSolverStatus.ModelInvalid => SolverResult<TVariable, TCoefficient, TVariableInterval>(
+                SolverResultStatus.ModelInvalid,
+                false),
+            _ => throw new MathematicalProgramException($"Unknown result status in solver. {resultStatus}")
+        };
+    }
+
+    private static ISolverResult<TVariable, TCoefficient, TVariableInterval>
+        SolverResult<TVariable, TCoefficient, TVariableInterval>(SolverResultStatus resultStatus,
+            bool switchedToDefaultSolver,
+            ISolutionValues<TVariable, TCoefficient, TVariableInterval>? solutionValues = null,
+            double? objectiveValue = null, double? bestBound = null, bool isFeasible = false, bool isOptimal = false)
+        where TVariable : IVariable<TVariableInterval>
+        where TVariableInterval : IAddableScalar<TVariableInterval, TVariableInterval>
+    {
+        return new SolverResult<TVariable, TCoefficient, TVariableInterval>(
+            solutionValues ??
+            new SolutionValues<TVariable, TCoefficient, TVariableInterval>(ReadOnlyDictionary<TVariable, TCoefficient>
+                .Empty),
+            objectiveValue is null ? null : new ObjectiveValue(objectiveValue.Value),
+            new IsFeasible(isFeasible),
+            new IsOptimal(isOptimal),
+            objectiveValue is null || bestBound is null ? null : CalculateGap(objectiveValue.Value, bestBound.Value),
+            resultStatus,
+            switchedToDefaultSolver);
+    }
+
+    private static OptimalityGap CalculateGap(double objectiveValue, double bestBound) =>
+        bestBound is 0 && objectiveValue is 0
+            ? new OptimalityGap(0)
+            : new OptimalityGap(Math.Abs(bestBound - objectiveValue) / objectiveValue);
 }

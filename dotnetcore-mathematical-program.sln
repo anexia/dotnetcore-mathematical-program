@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Anexia.MathematicalProgram.Examples", "examples\Anexia.MathematicalProgram.Examples\Anexia.MathematicalProgram.Examples.csproj", "{E9938A0B-7D93-40C2-B25C-B1470EA846AE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,5 +25,9 @@ Global
 		{EB1C030D-619B-41A2-801F-5F34C8465526}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EB1C030D-619B-41A2-801F-5F34C8465526}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EB1C030D-619B-41A2-801F-5F34C8465526}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9938A0B-7D93-40C2-B25C-B1470EA846AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9938A0B-7D93-40C2-B25C-B1470EA846AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9938A0B-7D93-40C2-B25C-B1470EA846AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9938A0B-7D93-40C2-B25C-B1470EA846AE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

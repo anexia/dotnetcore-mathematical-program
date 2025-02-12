@@ -4,11 +4,14 @@
 //  </copyright>
 //  ------------------------------------------------------------------------------------------
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Anexia.MathematicalProgram.Solve;
 
 /// <summary>
 /// An exception occured while solving a model.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed class MathematicalProgramException : Exception
 {
     internal MathematicalProgramException(Exception exception)
