@@ -4,6 +4,8 @@
 //  </copyright>
 //  ------------------------------------------------------------------------------------------
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Anexia.MathematicalProgram.SolverConfiguration;
 
 /// <summary>
@@ -18,5 +20,6 @@ public sealed class EnableSolverOutput(bool value) : MemberwiseEquatable<EnableS
     public bool Value { get; } = value;
 
     /// <inheritdoc />
+    [ExcludeFromCodeCoverage]
     public override string ToString() => $"{nameof(Value)}: {Value}";
 }

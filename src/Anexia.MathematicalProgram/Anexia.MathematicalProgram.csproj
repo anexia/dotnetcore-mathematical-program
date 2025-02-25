@@ -20,4 +20,12 @@
     <ItemGroup>
         <None Include="$(MSBuildProjectDirectory)/../../README.md" Pack="true" PackagePath="/"/>
     </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Update="Google.OrTools" Version="9.12.4544" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="Anexia.MathematicalProgram.Tests" />
+    </ItemGroup>
 </Project>

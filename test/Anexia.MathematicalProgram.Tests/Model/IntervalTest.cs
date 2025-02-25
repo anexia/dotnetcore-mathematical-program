@@ -4,11 +4,10 @@
 //  </copyright>
 //  ------------------------------------------------------------------------------------------
 
-#region
 
-using Anexia.MathematicalProgram.Model;
-
-#endregion
+using Anexia.MathematicalProgram.Model.Interval;
+using Anexia.MathematicalProgram.Model.Scalar;
+using Anexia.MathematicalProgram.Model.Variable;
 
 namespace Anexia.MathematicalProgram.Tests.Model;
 
@@ -20,8 +19,6 @@ public sealed class IntervalTest
     [InlineData(-0.1, -0.11)]
     [InlineData(double.MaxValue, double.Epsilon)]
     public void IntervalInitializingThrowsExpectedException(double left, double right) =>
-        Assert.Throws<InadmissibleBoundsException>(() => new Interval(new LowerBound(left), new UpperBound(right)));
-
-    [Fact]
-    public void SuccessfulIntervalInitializing() => Assert.NotNull(new Interval(new LowerBound(5), new UpperBound(6)));
+        Assert.Throws<InadmissibleBoundsException<RealScalar>>(() =>
+            new RealInterval(new RealScalar(left), new RealScalar(right)));
 }

@@ -4,6 +4,8 @@
 //  </copyright>
 //  ------------------------------------------------------------------------------------------
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Anexia.MathematicalProgram.SolverConfiguration;
 
 /// <summary>
@@ -15,5 +17,6 @@ public sealed class NumberOfThreads(uint value) : MemberwiseEquatable<NumberOfTh
     public uint Value { get; } = value;
 
     /// <inderitdoc />
+    [ExcludeFromCodeCoverage]
     public override string ToString() => $"{nameof(Value)}: {Value}";
 }

@@ -4,6 +4,8 @@
 //  </copyright>
 //  ------------------------------------------------------------------------------------------
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Anexia.MathematicalProgram.Result;
 
 /// <summary>
@@ -18,5 +20,6 @@ public sealed class ObjectiveValue(double value) : MemberwiseEquatable<Objective
     public double Value { get; } = value;
 
     /// <inheritdoc />
+    [ExcludeFromCodeCoverage]
     public override string ToString() => $"{Value}";
 }

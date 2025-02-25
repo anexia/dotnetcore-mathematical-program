@@ -4,47 +4,51 @@
 //  </copyright>
 //  ------------------------------------------------------------------------------------------
 
-#region
 
+using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using Anexia.MathematicalProgram.Model;
+using Anexia.MathematicalProgram.Model.Scalar;
+using Anexia.MathematicalProgram.Model.Variable;
 using Anexia.MathematicalProgram.Result;
 using Anexia.MathematicalProgram.Solve;
 using Anexia.MathematicalProgram.SolverConfiguration;
 using static System.Double;
-using static Anexia.MathematicalProgram.Tests.Factory.ConstraintFactory;
 using static Anexia.MathematicalProgram.Tests.Factory.IntervalFactory;
-using static Anexia.MathematicalProgram.Tests.Factory.TermFactory;
+using static Anexia.MathematicalProgram.Tests.Factory.SolutionValuesFactory;
+using static Anexia.MathematicalProgram.Tests.Factory.SolverResultFactory;
 
-#endregion
 
 namespace Anexia.MathematicalProgram.Tests.Solve;
 
 public sealed class LinearSolverTest
 {
     [Fact]
-    public void SolverWithoutObjectiveAndConstraintsReturnsCorrectResult()
-    {
-        var result = new LinearProgramSolver().Solve();
-
-        Assert.Equal(new SolverResult(
-            result.SolvedSolver, new ObjectiveValue(0), new IsFeasible(true), new IsOptimal(true),
-            new OptimalityGap(0)), result);
-    }
-
-    [Fact]
     public void SolverWithSimpleFeasibleMinimizationLpModelReturnsCorrectResult()
     {
         /*
          * min 2x, s.t. x=2, x in (0,3)
          */
-        var result = new LinearProgramSolver()
-            .AddContinuousVariable(Interval(0, 3), "TestVariable", out var testVariable)
-            .SetObjective(new Terms(Term(2, testVariable)), true)
-            .AddConstraints(Constraints(Constraint([Term(1, testVariable)], Point(2)))).Solve();
 
-        Assert.Equal(new SolverResult(
-            result.SolvedSolver, new ObjectiveValue(4), new IsFeasible(true), new IsOptimal(true),
-            new OptimalityGap(0)), result);
+        var model = new OptimizationModel<ContinuousVariable<IRealScalar>, IRealScalar, IRealScalar>();
+        var x = model.NewVariable<ContinuousVariable<IRealScalar>>(Interval(0, 3), "TestVariable");
+
+        model.AddConstraint(model.CreateConstraintBuilder()
+            .AddTermToSum(new IntegerScalar(1), x).Build(Point(2)));
+
+        var optimizationModel =
+            model.SetObjective(
+                model.CreateObjectiveFunctionBuilder().AddTermToSum(new IntegerScalar(2), x).Build(false));
+
+        var result = SolverFactory.SolverFor(LpSolverType.Glop).Solve(optimizationModel,
+            new SolverParameter());
+
+        Assert.Equal(
+            SolverResult(
+                SolutionValues<ContinuousVariable<IRealScalar>, RealScalar, IRealScalar>(
+                    (x, new RealScalar(2))), new ObjectiveValue(4), new IsFeasible(true),
+                new IsOptimal(true), null,
+                SolverResultStatus.Optimal, false), result);
     }
 
     [Fact]
@@ -53,14 +57,26 @@ public sealed class LinearSolverTest
         /*
          * max 2x, s.t. x<=2, x in (0,3)
          */
-        var result = new LinearProgramSolver()
-            .AddContinuousVariable(Interval(0, 3), "TestVariable", out var testVariable)
-            .SetObjective(new Terms(Term(2, testVariable)), false)
-            .AddConstraints(Constraints(Constraint([Term(1, testVariable)], Interval(NegativeInfinity, 2)))).Solve();
 
-        Assert.Equal(new SolverResult(
-            result.SolvedSolver, new ObjectiveValue(4), new IsFeasible(true), new IsOptimal(true),
-            new OptimalityGap(0)), result);
+        var model = new OptimizationModel<ContinuousVariable<IRealScalar>, IRealScalar, IRealScalar>();
+        var x = model.NewVariable<ContinuousVariable<IRealScalar>>(Interval(0, 3), "TestVariable");
+
+        model.AddConstraint(model.CreateConstraintBuilder()
+            .AddTermToSum(new IntegerScalar(1), x).Build(Interval(NegativeInfinity, 2)));
+
+        var optimizationModel =
+            model.SetObjective(model.CreateObjectiveFunctionBuilder().AddTermToSum(new IntegerScalar(2), x)
+                .Build());
+
+        var result = SolverFactory.SolverFor(LpSolverType.Glop).Solve(optimizationModel,
+            new SolverParameter());
+
+        Assert.Equal(
+            SolverResult(
+                SolutionValues<ContinuousVariable<IRealScalar>, RealScalar, IRealScalar>(
+                    (x, new RealScalar(2))), new ObjectiveValue(4), new IsFeasible(true),
+                new IsOptimal(true), null,
+                SolverResultStatus.Optimal, false), result);
     }
 
     [Fact]
@@ -69,30 +85,24 @@ public sealed class LinearSolverTest
         /*
          * max 2x, s.t. x=3, x in (0,1)
          */
-        var result = new LinearProgramSolver()
-            .AddContinuousVariable(Interval(0, 1), "TestVariable", out var testVariable)
-            .SetObjective(new Terms(Term(2, testVariable)), false)
-            .AddConstraints(Constraints(Constraint([Term(1, testVariable)], Point(3)))).Solve(new SolverParameter(
-                EnableSolverOutput.True,
-                RelativeGap.EMinus7, new TimeLimitInMilliseconds(10),
-                new NumberOfThreads(2)));
 
-        Assert.Equal(new SolverResult(
-            result.SolvedSolver, new ObjectiveValue(double.NaN), new IsFeasible(false), new IsOptimal(false),
-            new OptimalityGap(double.NaN)), result);
-    }
+        var model = new OptimizationModel<ContinuousVariable<IRealScalar>, IRealScalar, IRealScalar>();
+        var x = model.NewVariable<ContinuousVariable<IRealScalar>>(Interval(0, 1), "TestVariable");
 
-    [Fact]
-    public void SolverWithAbnormalLpModelThrowsExpectedException()
-    {
-        /*
-         * min infinity x, x in R
-         */
-        var solver = new LinearProgramSolver()
-            .AddContinuousVariable(Interval(NegativeInfinity, PositiveInfinity), "TestVariable", out var testVariable)
-            .SetObjective(new Terms(Term(NegativeInfinity, testVariable)), true);
+        model.AddConstraint(model.CreateConstraintBuilder()
+            .AddTermToSum(new IntegerScalar(1), x).Build(Point(3)));
 
-        Assert.Throws<MathematicalProgramException>(() =>
-            solver.Solve(new SolverParameter(new TimeLimitInMilliseconds(10))));
+        var optimizationModel =
+            model.SetObjective(model.CreateObjectiveFunctionBuilder().AddTermToSum(new IntegerScalar(2), x)
+                .Build());
+        var result = SolverFactory.SolverFor(LpSolverType.Glop).Solve(optimizationModel, new SolverParameter());
+
+        Assert.Equal(
+            SolverResult(
+                new SolutionValues<ContinuousVariable<IRealScalar>, RealScalar, IRealScalar>(
+                    ReadOnlyDictionary<ContinuousVariable<IRealScalar>, RealScalar>.Empty), null,
+                new IsFeasible(false),
+                new IsOptimal(false), null,
+                SolverResultStatus.Infeasible, false), result);
     }
 }

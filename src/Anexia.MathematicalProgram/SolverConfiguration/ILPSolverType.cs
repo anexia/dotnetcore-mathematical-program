@@ -4,11 +4,9 @@
 //  </copyright>
 //  ------------------------------------------------------------------------------------------
 
-#region
 
 using System.Runtime.Serialization;
 
-#endregion
 
 namespace Anexia.MathematicalProgram.SolverConfiguration;
 
@@ -20,12 +18,18 @@ public enum IlpSolverType
     /// <summary>
     /// <see href="https://github.com/coin-or/Cbc">CBC</see> solver.
     /// </summary>
+    [Obsolete("CBC Solver should not be used anymore, switch to SCIP instead.")]
     [EnumMember(Value = "CBC_MIXED_INTEGER_PROGRAMMING")]
-    CbcMixedIntegerProgramming,
+    CbcIntegerProgramming,
 
     /// <summary>
     /// <see href="https://gurobi.com">Gurobi</see> solver. A licence is needed for usage.
     /// </summary>
     [EnumMember(Value = "GUROBI_MIXED_INTEGER_PROGRAMMING")]
-    GurobiMixedIntegerProgramming
+    GurobiIntegerProgramming,
+
+    /// <summary>
+    /// <see href="https://www.scipopt.org/">SCIP</see> solver.
+    /// </summary>
+    [EnumMember(Value = "SCIP")] Scip,
 }

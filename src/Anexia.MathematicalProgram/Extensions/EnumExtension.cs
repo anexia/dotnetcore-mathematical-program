@@ -4,11 +4,9 @@
 //  </copyright>
 //  ------------------------------------------------------------------------------------------
 
-#region
 
 using System.Runtime.Serialization;
 
-#endregion
 
 namespace Anexia.MathematicalProgram.Extensions;
 

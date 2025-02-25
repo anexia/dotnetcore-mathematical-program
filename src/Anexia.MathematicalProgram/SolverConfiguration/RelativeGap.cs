@@ -4,6 +4,8 @@
 //  </copyright>
 //  ------------------------------------------------------------------------------------------
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Anexia.MathematicalProgram.SolverConfiguration;
 
 /// <summary>
@@ -24,5 +26,6 @@ public sealed class RelativeGap(double relativeGap) : MemberwiseEquatable<Relati
     public static RelativeGap FromEMinus(uint negativeExponent) => new(Math.Pow(10, -negativeExponent));
 
     /// <inderitdoc />
+    [ExcludeFromCodeCoverage]
     public override string ToString() => $"{nameof(Value)}: {Value}";
 }
