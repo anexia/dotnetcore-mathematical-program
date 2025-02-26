@@ -20,15 +20,20 @@ public readonly record struct Variables<TVariable, TVariableInterval> :
     IVariables<TVariable, TVariableInterval> where TVariable : IVariable<TVariableInterval>
     where TVariableInterval : IAddableScalar<TVariableInterval, TVariableInterval>
 {
-    private readonly ImmutableHashSet<TVariable> _elements;
+    private readonly ImmutableSortedSet<TVariable> _elements;
 
     public Variables() : this([])
     {
     }
 
-    public Variables(ImmutableHashSet<TVariable> elements)
+    private Variables(ImmutableSortedSet<TVariable> elements)
     {
         _elements = elements;
+    }
+
+    public Variables(IEnumerable<TVariable> elements) : this(
+        elements.ToImmutableSortedSet(new VariableComparer<TVariable, TVariableInterval>()))
+    {
     }
 
     /// <summary>

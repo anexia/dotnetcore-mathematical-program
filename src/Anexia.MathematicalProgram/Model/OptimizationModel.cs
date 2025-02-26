@@ -84,7 +84,7 @@ public readonly record struct
     public ICompletedOptimizationModel<TVariable, TCoefficient, TInterval> SetObjective(
         IObjectiveFunction<TVariable, TCoefficient, TInterval> objectiveFunction) =>
         new CompletedOptimizationModel<TVariable, TCoefficient, TInterval>(
-            new Variables<TVariable, TInterval>(_variables.ToImmutableHashSet()),
+            new Variables<TVariable, TInterval>([.. _variables]),
             new Constraints<TVariable, TCoefficient, TInterval>(_constraints),
             objectiveFunction);
 
