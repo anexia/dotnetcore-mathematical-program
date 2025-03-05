@@ -4,7 +4,6 @@
 //  </copyright>
 // ------------------------------------------------------------------------------------------
 
-using System.Collections.Immutable;
 using Anexia.MathematicalProgram.Model.Expression;
 using Anexia.MathematicalProgram.Model.Interval;
 using Anexia.MathematicalProgram.Model.Scalar;
@@ -18,7 +17,7 @@ namespace Anexia.MathematicalProgram.Model;
 /// <typeparam name="TVariable">The type of the Variable.</typeparam>
 /// <typeparam name="TCoefficient">The scalar type of the variable's coefficient.</typeparam>
 /// <typeparam name="TInterval">The type of the variable and constraint interval's scalar.</typeparam>
-public readonly record struct
+public sealed record
     OptimizationModel<TVariable, TCoefficient, TInterval>
     where TVariable : IVariable<TInterval>
     where TCoefficient : IAddableScalar<TCoefficient, TCoefficient>
@@ -102,4 +101,17 @@ public readonly record struct
     /// Creates a new instance of <see cref="CreateObjectiveFunctionBuilder"/>
     /// </summary>
     public ObjectiveFunctionBuilder<TVariable, TCoefficient, TInterval> CreateObjectiveFunctionBuilder() => new();
+
+    public bool Equals(OptimizationModel<TVariable, TCoefficient, TInterval>? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return _variables.SetEquals(other._variables) && _constraints.SequenceEqual(other._constraints);
+    }
+    
+    public override int GetHashCode() =>
+        _variables.Select(item => item.GetHashCode())
+            .Concat(_constraints.Select(item => item.GetHashCode()))
+            .Aggregate(0,
+                HashCode.Combine);
 }

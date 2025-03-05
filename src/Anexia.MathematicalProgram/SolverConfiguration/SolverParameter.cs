@@ -5,6 +5,7 @@
 //  ------------------------------------------------------------------------------------------
 
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 
 namespace Anexia.MathematicalProgram.SolverConfiguration;
 
@@ -15,8 +16,7 @@ namespace Anexia.MathematicalProgram.SolverConfiguration;
 /// <param name="TimeLimitInMilliseconds">Time limit of the solving process.</param>
 /// <param name="NumberOfThreads">The number of threads that should be used by the solver.</param>
 /// <param name="RelativeGap">The relative gap when the solver should terminate.</param>
-/// <param name="ExportModelFilePath">The file path and name of a file where the model should be written to.
-/// Use .txt extension for a human-readable format, otherwise it is saved as binary file.</param>
+/// <param name="ExportModelFilePath">The file path and name of a file where the model should be written to.</param>
 public record SolverParameter(
     EnableSolverOutput EnableSolverOutput,
     RelativeGap? RelativeGap = null,
@@ -35,7 +35,9 @@ public record SolverParameter(
             { (IlpSolverType.GurobiIntegerProgramming, RelativeGapKey), "MIPGap" },
             { (IlpSolverType.GurobiIntegerProgramming, NumberOfThreadsKey), "Threads" },
             { (IlpSolverType.Scip, RelativeGapKey), "limits/gap" },
-            { (IlpSolverType.Scip, NumberOfThreadsKey), "parallel/maxnthreads" }
+            { (IlpSolverType.Scip, NumberOfThreadsKey), "parallel/maxnthreads" },
+            { (IlpSolverType.HiGhs, RelativeGapKey), "mip_rel_gap" },
+            { (IlpSolverType.HiGhs, NumberOfThreadsKey), "threads" }
         };
 
     private static readonly Dictionary<(LpSolverType, string), string> LpParameterKeyMapping =
@@ -104,7 +106,7 @@ public record SolverParameter(
                 $"{IlpParameterKeyMapping[(solverType, NumberOfThreadsKey)]}={NumberOfThreads.Value}");
         if (RelativeGap is not null)
             parameters.Add(
-                $"{IlpParameterKeyMapping[(solverType, RelativeGapKey)]}={RelativeGap.Value}");
+                $"{IlpParameterKeyMapping[(solverType, RelativeGapKey)]}={RelativeGap.Value.ToString(CultureInfo.InvariantCulture)}");
 
         return string.Join(',', parameters);
     }

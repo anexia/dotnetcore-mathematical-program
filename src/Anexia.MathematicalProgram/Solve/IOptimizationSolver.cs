@@ -35,4 +35,5 @@ public interface IOptimizationSolver<in TVariable, in TCoefficient, in TInterval
     public ISolverResult<TVariable, TSolutionType, TIntervalScalar> Solve(
         ICompletedOptimizationModel<TVariable, TCoefficient, TIntervalScalar> model,
         SolverParameter solverParameter);
+
 }
