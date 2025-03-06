@@ -50,6 +50,30 @@ public sealed class IlpSolverTest
     }
 
     [Fact]
+    public void SolverFromModelReturnsCorrectResult()
+    {
+        /*
+         * min 2x, s.t. x=1, x binary
+         */
+
+        var model =
+            new OptimizationModel<IIntegerVariable<IRealScalar>, IRealScalar, IRealScalar>();
+        var v1 = model.NewVariable<IntegerVariable<IRealScalar>>(Interval(1d, 1d), "TestVariable");
+
+        var optimizationModel =
+            model.SetObjective(
+                model.CreateObjectiveFunctionBuilder().AddTermToSum(new IntegerScalar(2), v1).Build(false));
+
+        var result = SolverFactory.SolverFor(IlpSolverType.Scip).Solve(optimizationModel,
+            new SolverParameter(new EnableSolverOutput(true), ExportModelFilePath: "model.txt"));
+
+        var resultFromModel = new IlpSolver(IlpSolverType.Scip).Solve(
+            new ModelAsMpsFormat(File.ReadAllText("model.txt")), new SolverParameter(new EnableSolverOutput(true)));
+
+        Assert.Equal(result, resultFromModel);
+    }
+
+    [Fact]
     public void SolverWithInfeasibleIlModelReturnsCorrectResult()
     {
         /*

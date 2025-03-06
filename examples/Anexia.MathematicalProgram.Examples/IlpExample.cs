@@ -45,15 +45,22 @@ public static class IlpExample
         var optimizationModel = model.SetObjective(objFunction);
 
         // Create SCIP Solver and solve model. Different settings can be set via out parameters.
-        var result = SolverFactory.SolverFor(IlpSolverType.Scip).Solve(optimizationModel,
-            new SolverParameter(new EnableSolverOutput(true), RelativeGap.EMinus7,
+        var result = SolverFactory.SolverFor(IlpSolverType.HiGhs).Solve(optimizationModel,
+            new SolverParameter(new EnableSolverOutput(false), RelativeGap.EMinus7,
                 new TimeLimitInMilliseconds(10000), new NumberOfThreads(2), "model.txt"));
 
         Console.WriteLine(result);
         // Output: ObjectiveValue: 2, IsFeasible: True, IsOptimal: True, OptimalityGap: 0 
         //         Variable Values: x=1, y=-0
 
+
+        // Pass MPS model generated above to solver.
+        var resultFromModel = new IlpSolver(IlpSolverType.Scip).Solve(
+            new ModelAsMpsFormat(File.ReadAllText("model.txt")), new SolverParameter());
         
+        // Prints same result as above.
+        Console.WriteLine(resultFromModel);
+
         // Print optimization model
         Console.WriteLine(optimizationModel.ToString());
     }
