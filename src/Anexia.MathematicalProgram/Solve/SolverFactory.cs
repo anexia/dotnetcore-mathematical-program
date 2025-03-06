@@ -25,7 +25,7 @@ public static class SolverFactory
         {
             IlpSolverType.CbcIntegerProgramming => new IlpCbcSolver(),
             IlpSolverType.GurobiIntegerProgramming or
-                IlpSolverType.Scip => new IlpSolver(solverType),
+                IlpSolverType.Scip or IlpSolverType.HiGhs => new IlpSolver(solverType),
             _ => throw new ArgumentOutOfRangeException(nameof(solverType), solverType, null)
         };
 

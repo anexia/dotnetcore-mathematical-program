@@ -32,4 +32,9 @@ public enum IlpSolverType
     /// <see href="https://www.scipopt.org/">SCIP</see> solver.
     /// </summary>
     [EnumMember(Value = "SCIP")] Scip,
+    
+    /// <summary>
+    /// <see hcref="https://highs.dev/">HiGHS</see> solver.
+    /// </summary>
+    [EnumMember(Value = "HIGHS_MIXED_INTEGER_PROGRAMMING")] HiGhs,
 }

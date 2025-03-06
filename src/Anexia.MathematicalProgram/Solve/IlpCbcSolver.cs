@@ -64,6 +64,8 @@ public sealed class IlpCbcSolver : MemberwiseEquatable<IlpCbcSolver>,
 
             if (solverParameter.TimeLimitInMilliseconds is not null)
                 Solver.SetTimeLimit(solverParameter.TimeLimitInMilliseconds.Value);
+            if (solverParameter.ExportModelFilePath is not null)
+                File.WriteAllText(solverParameter.ExportModelFilePath, Solver.ExportModelAsMpsFormat(true, false));
 
             if (solverParameter.EnableSolverOutput.Value) Solver.EnableOutput();
             using var parameter = new MPSolverParameters();

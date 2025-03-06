@@ -7,7 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.0.0] - 2025-01-26
+## [2.1.0] - 2025-03-05
+
+### Added
+
+- Added support for HiGHS solver for ILP Problems.
+- Added possibility to pass an MPS model as string to the ILP solver.
+
+## [2.0.1] - 2025-01-26
 
 - Internal optimizations.
 
