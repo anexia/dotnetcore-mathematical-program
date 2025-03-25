@@ -21,8 +21,9 @@ namespace Anexia.MathematicalProgram.Model.Expression;
 /// <typeparam name="TInterval">The type of the interval's scalar.</typeparam>
 public sealed class Constraints<TVariable, TCoefficient, TInterval>(
     IReadOnlyCollection<IConstraint<TVariable, TCoefficient, TInterval>> elements)
-    : IReadOnlyCollection<IConstraint<TVariable, TCoefficient, TInterval>> where TVariable : IVariable<TInterval>
-    where TCoefficient :  IAddableScalar<TCoefficient, TCoefficient>
+    : MemberwiseEquatable<Constraints<TVariable, TCoefficient, TInterval>>,
+        IReadOnlyCollection<IConstraint<TVariable, TCoefficient, TInterval>> where TVariable : IVariable<TInterval>
+    where TCoefficient : IAddableScalar<TCoefficient, TCoefficient>
     where TInterval : IAddableScalar<TInterval, TInterval>
 {
     /// <summary>

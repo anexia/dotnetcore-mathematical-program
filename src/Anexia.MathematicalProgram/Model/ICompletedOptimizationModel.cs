@@ -29,7 +29,7 @@ public interface ICompletedOptimizationModel<out TVariable, out TCoefficient, ou
     where TCoefficient : IAddableScalar<TCoefficient, TCoefficient>
     where TVariableInterval : IAddableScalar<TVariableInterval, TVariableInterval>
 {
-    internal IVariables<TVariable, TVariableInterval> Variables { get; }
-    internal IEnumerable<IConstraint<TVariable, TCoefficient, TVariableInterval>> Constraints { get; }
-    internal IObjectiveFunction<TVariable, TCoefficient, TVariableInterval> ObjectiveFunction { get; }
+    public IVariables<TVariable, TVariableInterval> Variables { get; }
+    public IReadOnlyCollection<IConstraint<TVariable, TCoefficient, TVariableInterval>> Constraints { get; }
+    public IObjectiveFunction<TVariable, TCoefficient, TVariableInterval> ObjectiveFunction { get; }
 }

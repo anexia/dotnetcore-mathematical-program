@@ -16,12 +16,15 @@ namespace Anexia.MathematicalProgram.SolverConfiguration;
 /// <param name="TimeLimitInMilliseconds">Time limit of the solving process.</param>
 /// <param name="NumberOfThreads">The number of threads that should be used by the solver.</param>
 /// <param name="RelativeGap">The relative gap when the solver should terminate.</param>
+/// <param name="AdditionalSolverSpecificParameters">Additional solver specific parameters (key-value string, use key:value for GLOP, key=value for other supported solvers) to pass to the solver. The correct format for the desired solver
+/// must be used. Check corresponding solver documentations to be sure.</param>
 /// <param name="ExportModelFilePath">The file path and name of a file where the model should be written to.</param>
 public record SolverParameter(
     EnableSolverOutput EnableSolverOutput,
     RelativeGap? RelativeGap = null,
     TimeLimitInMilliseconds? TimeLimitInMilliseconds = null,
     NumberOfThreads? NumberOfThreads = null,
+    IReadOnlyCollection<string>? AdditionalSolverSpecificParameters = null,
     string? ExportModelFilePath = null)
 {
     private const string RelativeGapKey = "RELATIVE_GAP";
@@ -45,10 +48,18 @@ public record SolverParameter(
         {
             { (LpSolverType.Glop, RelativeGapKey), "solution_feasibility_tolerance" },
             { (LpSolverType.Glop, NumberOfThreadsKey), "num_omp_threads" },
-            { (LpSolverType.GurobiIntegerProgramming, RelativeGapKey), "MIPGap" },
-            { (LpSolverType.GurobiIntegerProgramming, NumberOfThreadsKey), "Threads" },
+            { (LpSolverType.GurobiMixedIntegerProgramming, RelativeGapKey), "MIPGap" },
+            { (LpSolverType.GurobiMixedIntegerProgramming, NumberOfThreadsKey), "Threads" },
             { (LpSolverType.Scip, RelativeGapKey), "limits/gap" },
             { (LpSolverType.Scip, NumberOfThreadsKey), "parallel/maxnthreads" }
+        };
+
+    private static readonly Dictionary<LpSolverType, string> LpKeyValueSeparators =
+        new()
+        {
+            { LpSolverType.Glop, ":" },
+            { LpSolverType.GurobiMixedIntegerProgramming, "=" },
+            { LpSolverType.Scip, "=" }
         };
 
     /// <summary>
@@ -107,6 +118,7 @@ public record SolverParameter(
         if (RelativeGap is not null)
             parameters.Add(
                 $"{IlpParameterKeyMapping[(solverType, RelativeGapKey)]}={RelativeGap.Value.ToString(CultureInfo.InvariantCulture)}");
+        if (AdditionalSolverSpecificParameters is not null) parameters.AddRange(AdditionalSolverSpecificParameters);
 
         return string.Join(',', parameters);
     }
@@ -116,7 +128,9 @@ public record SolverParameter(
         var parameters = new List<string>();
         if (NumberOfThreads is not null)
             parameters.Add(
-                $"{LpParameterKeyMapping[(solverType, NumberOfThreadsKey)]}={NumberOfThreads.Value}");
+                $"{LpParameterKeyMapping[(solverType, NumberOfThreadsKey)]}{LpKeyValueSeparators[solverType]}{NumberOfThreads.Value}");
+
+        if (AdditionalSolverSpecificParameters is not null) parameters.AddRange(AdditionalSolverSpecificParameters);
 
         return string.Join(',', parameters);
     }

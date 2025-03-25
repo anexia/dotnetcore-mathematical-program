@@ -52,4 +52,33 @@ public sealed class OptimizationModelTest
 
         Assert.True(model1.Equals(model2));
     }
+
+    [Fact]
+    public void CompletedOptimizationModelsWithSameVariablesAndConstraintsAreEqualTest()
+    {
+        var model1 = new OptimizationModel<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar>();
+        var model2 = new OptimizationModel<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar>();
+
+        var m1V1 = model1.NewVariable<IntegerVariable<IRealScalar>>(new RealInterval(0, 1), "v1");
+        var m1V2 = model1.NewVariable<IntegerVariable<IRealScalar>>(new RealInterval(0, 2), "v2");
+
+        var m2V1 = model2.NewVariable<IntegerVariable<IRealScalar>>(new RealInterval(0, 1), "v1");
+        var m2V2 = model2.NewVariable<IntegerVariable<IRealScalar>>(new RealInterval(0, 2), "v2");
+
+        var constraintM1 = model1.CreateConstraintBuilder()
+            .AddTermToSum(1, m1V1)
+            .AddTermToSum(2, m1V2)
+            .Build(new IntegralInterval(-10, 20));
+
+        var constraintM2 = model1.CreateConstraintBuilder()
+            .AddTermToSum(1, m2V1)
+            .AddTermToSum(2, m2V2)
+            .Build(new IntegralInterval(-10, 20));
+
+        model1.AddConstraint(constraintM1);
+        model2.AddConstraint(constraintM2);
+
+        Assert.True(model1.SetObjective(model1.CreateObjectiveFunctionBuilder().AddTermToSum(1, m1V1).Build())
+            .Equals(model2.SetObjective(model2.CreateObjectiveFunctionBuilder().AddTermToSum(1, m2V1).Build())));
+    }
 }

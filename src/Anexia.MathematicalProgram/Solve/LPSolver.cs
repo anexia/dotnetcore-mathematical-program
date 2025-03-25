@@ -6,6 +6,7 @@
 
 using Anexia.MathematicalProgram.Extensions;
 using Anexia.MathematicalProgram.Model;
+using Anexia.MathematicalProgram.Model.Interval;
 using Anexia.MathematicalProgram.Model.Scalar;
 using Anexia.MathematicalProgram.Model.Variable;
 using Anexia.MathematicalProgram.Result;
@@ -38,20 +39,7 @@ public sealed class LpSolver : MemberwiseEquatable<LpSolver>,
             IRealScalar> completedOptimizationModel,
         SolverParameter solverParameter)
     {
-        var solver = new Solver(SolverType.ToEnumString());
-        var switchedSolver = false;
-
-        if (!solver.SolverIsSupported())
-        {
-            switchedSolver = true;
-            solver = new Solver(IlpSolverType.Scip.ToEnumString());
-        }
-
-        if (solverParameter.TimeLimitInMilliseconds is not null)
-            solver.SetTimeLimitInSeconds(solverParameter.TimeLimitInMilliseconds.AsSeconds);
-
-        if (solverParameter.EnableSolverOutput.Value) solver.EnableOutput(true);
-        solver.SetSolverSpecificParameters(solverParameter.ToSolverSpecificParameters(SolverType));
+        var (configuredSolver, solverWasSwitched) = InitializeSolver(solverParameter);
 
         var model = new Google.OrTools.ModelBuilder.Model();
 
@@ -71,16 +59,90 @@ public sealed class LpSolver : MemberwiseEquatable<LpSolver>,
                        LinearExpr.Constant(completedOptimizationModel.ObjectiveFunction.Offset?.Value ?? 0),
             completedOptimizationModel.ObjectiveFunction.Maximize);
 
-        var result = solver.Solve(model);
-        if (!solver.HasSolution())
+        ExportModelIfRequested(solverParameter, model);
+
+        var result = configuredSolver.Solve(model);
+        if (!configuredSolver.HasSolution())
             return ResultHandling.Handle<ContinuousVariable<IRealScalar>, RealScalar, IRealScalar>(result,
-                switchedSolver);
+                solverWasSwitched);
 
         var solutionValues = new SolutionValues<ContinuousVariable<IRealScalar>, RealScalar, IRealScalar>(
             variables.ToDictionary(
                 variable => variable.Key,
-                variable => new RealScalar(solver.Value(variable.Value))).AsReadOnly());
+                variable => new RealScalar(configuredSolver.Value(variable.Value))).AsReadOnly());
 
-        return ResultHandling.Handle(result, switchedSolver, solutionValues, solver.ObjectiveValue);
+        return ResultHandling.Handle(result, solverWasSwitched, solutionValues, configuredSolver.ObjectiveValue);
+    }
+
+    /// <summary>
+    /// Solves the given model.
+    /// </summary>
+    /// <param name="modelInMpsFormat">The model to be solved in MPS format.</param>
+    /// <param name="solverParameter">Parameters to be passed to the underlying solver.</param>
+    /// <returns>Solver result containing solution information.</returns>
+    public ISolverResult<ContinuousVariable<IRealScalar>, RealScalar, IRealScalar> Solve(
+        ModelAsMpsFormat modelInMpsFormat,
+        SolverParameter solverParameter)
+    {
+        var (configuredSolver, solverWasSwitched) = InitializeSolver(solverParameter);
+
+        var model = new Google.OrTools.ModelBuilder.Model();
+
+        model.ImportFromMpsString(modelInMpsFormat.Model);
+
+        ExportModelIfRequested(solverParameter, model);
+
+        var result = configuredSolver.Solve(model);
+        if (!configuredSolver.HasSolution())
+            return ResultHandling.Handle<ContinuousVariable<IRealScalar>, RealScalar, IRealScalar>(result,
+                solverWasSwitched);
+
+        var variables = new Dictionary<ContinuousVariable<IRealScalar>, RealScalar>();
+        for (var i = 0; i < model.VariablesCount(); i++)
+        {
+            var variable = model.VarFromIndex(i);
+            variables.Add(new ContinuousVariable<IRealScalar>(
+                new RealInterval(variable.LowerBound, variable.UpperBound),
+                variable.Name), new RealScalar(configuredSolver.Value(variable)));
+        }
+
+        var solutionValues =
+            new SolutionValues<ContinuousVariable<IRealScalar>, RealScalar, IRealScalar>(variables.AsReadOnly());
+
+        return ResultHandling.Handle(result, solverWasSwitched,
+            solutionValues, configuredSolver.ObjectiveValue);
+    }
+
+    private (Solver configuredSolver, bool solverWasSwitched) InitializeSolver(SolverParameter solverParameter)
+    {
+        var configuredSolver = new Solver(SolverType.ToEnumString());
+        var solverWasSwitched = false;
+
+        if (!configuredSolver.SolverIsSupported())
+        {
+            configuredSolver = new Solver(LpSolverType.Scip.ToEnumString());
+            solverWasSwitched = true;
+        }
+
+        if (solverParameter.TimeLimitInMilliseconds is not null)
+            configuredSolver.SetTimeLimitInSeconds(solverParameter.TimeLimitInMilliseconds.AsSeconds);
+
+        if (solverParameter.EnableSolverOutput.Value)
+            configuredSolver.EnableOutput(true);
+
+        var solverTypeToUse = solverWasSwitched ? LpSolverType.Scip : SolverType;
+        var solverSpecificParameters = solverParameter.ToSolverSpecificParameters(solverTypeToUse);
+        configuredSolver.SetSolverSpecificParameters(solverSpecificParameters);
+
+        return (configuredSolver, solverWasSwitched);
+    }
+
+    private void ExportModelIfRequested(SolverParameter solverParameter, Google.OrTools.ModelBuilder.Model model)
+    {
+        if (solverParameter.ExportModelFilePath is not null)
+        {
+            File.WriteAllText(solverParameter.ExportModelFilePath, model.ExportToMpsString(false));
+            File.WriteAllText(solverParameter.ExportModelFilePath.Replace(".", "_lp."), model.ExportToLpString(false));
+        }
     }
 }
