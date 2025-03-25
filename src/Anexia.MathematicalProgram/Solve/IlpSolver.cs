@@ -83,46 +83,6 @@ public sealed class IlpSolver(IlpSolverType solverType) : MemberwiseEquatable<Il
 
         model.ImportFromMpsString(modelInMpsFormat.Model);
 
-        var newModel = new OptimizationModel<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar>();
-
-        var vars = new Dictionary<string, IIntegerVariable<IRealScalar>>();
-
-        for (int i = 0; i < model.VariablesCount(); i++)
-        {
-            vars.Add(model.VarFromIndex(i).Name,
-                newModel.NewVariable<IntegerVariable<IRealScalar>>(new RealInterval(model.VarFromIndex(i).LowerBound,
-                    model.VarFromIndex(i).UpperBound), model.VarFromIndex(i).Name));
-        }
-
-        for (int i = 0; i < model.ConstraintsCount(); i++)
-        {
-            var ind = model.ConstraintFromIndex(i).Helper.ConstraintVarIndices(i);
-            var myVars = ind.Select(index => vars[model.VarFromIndex(index).Name]);
-
-
-            newModel.AddConstraint(new Constraint<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar>(
-                newModel.CreateWeightedSumBuilder()
-                    .AddWeightedSum(
-                        myVars,
-                        model.ConstraintFromIndex(i).Helper.ConstraintCoefficients(i)
-                            .Select(item => new RealScalar(item))
-                    ).Build(),
-                new RealInterval(model.ConstraintFromIndex(i).LowerBound, model.ConstraintFromIndex(i).UpperBound)
-            ));
-        }
-
-
-        var b = newModel.CreateObjectiveFunctionBuilder();
-        for (int i = 0; i < model.VariablesCount(); i++)
-        {
-            var coeff = model.VarFromIndex(0).Helper.VarObjectiveCoefficient(i);
-            var vName = model.VarFromIndex(i).Name;
-            b.AddTermToSum(new RealScalar(coeff), vars[vName]);
-        }
-
-        new IlpCbcSolver().Solve(newModel.SetObjective(b.Build(false)), solverParameter);
-
-
         ExportModelIfRequested(solverParameter, model);
 
         var result = configuredSolver.Solve(model);
