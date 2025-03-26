@@ -21,4 +21,6 @@ internal static class IntervalFactory
         new IntegerScalar(right));
 
     public static Point Point(double point) => new(point);
+
+    public static IntegralPoint Point(int point) => new(point);
 }

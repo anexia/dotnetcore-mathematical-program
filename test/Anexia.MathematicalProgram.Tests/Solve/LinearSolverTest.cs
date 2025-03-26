@@ -34,7 +34,7 @@ public sealed class LinearSolverTest
         var x = model.NewVariable<ContinuousVariable<IRealScalar>>(Interval(0, 3), "TestVariable");
 
         model.AddConstraint(model.CreateConstraintBuilder()
-            .AddTermToSum(new IntegerScalar(1), x).Build(Point(2)));
+            .AddTermToSum(new IntegerScalar(1), x).Build(Point(2d)));
 
         var optimizationModel =
             model.SetObjective(
@@ -80,6 +80,30 @@ public sealed class LinearSolverTest
     }
 
     [Fact]
+    public void SolverFromModelReturnsCorrectResult()
+    {
+        /*
+         * min 2x, s.t. x=1, x binary
+         */
+
+        var model =
+            new OptimizationModel<ContinuousVariable<IRealScalar>, RealScalar, IRealScalar>();
+        var v1 = model.NewVariable<ContinuousVariable<IRealScalar>>(Interval(1d, 1d), "TestVariable");
+
+        var optimizationModel =
+            model.SetObjective(
+                model.CreateObjectiveFunctionBuilder().AddTermToSum(new RealScalar(2), v1).Build(false));
+
+        var result = SolverFactory.SolverFor(LpSolverType.Scip).Solve(optimizationModel,
+            new SolverParameter(new EnableSolverOutput(true), ExportModelFilePath: "model.txt"));
+
+        var resultFromModel = new LpSolver(LpSolverType.Scip).Solve(
+            new ModelAsMpsFormat(File.ReadAllText("model.txt")), new SolverParameter(new EnableSolverOutput(true)));
+
+        Assert.Equal(result, resultFromModel);
+    }
+
+    [Fact]
     public void SolverWithInfeasibleLpModelReturnsCorrectResult()
     {
         /*
@@ -90,7 +114,7 @@ public sealed class LinearSolverTest
         var x = model.NewVariable<ContinuousVariable<IRealScalar>>(Interval(0, 1), "TestVariable");
 
         model.AddConstraint(model.CreateConstraintBuilder()
-            .AddTermToSum(new IntegerScalar(1), x).Build(Point(3)));
+            .AddTermToSum(new IntegerScalar(1), x).Build(Point(3d)));
 
         var optimizationModel =
             model.SetObjective(model.CreateObjectiveFunctionBuilder().AddTermToSum(new IntegerScalar(2), x)

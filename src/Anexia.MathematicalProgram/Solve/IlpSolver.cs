@@ -1,5 +1,6 @@
 using Anexia.MathematicalProgram.Extensions;
 using Anexia.MathematicalProgram.Model;
+using Anexia.MathematicalProgram.Model.Expression;
 using Anexia.MathematicalProgram.Model.Interval;
 using Anexia.MathematicalProgram.Model.Scalar;
 using Anexia.MathematicalProgram.Model.Variable;
