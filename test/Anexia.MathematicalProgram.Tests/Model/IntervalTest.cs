@@ -21,4 +21,12 @@ public sealed class IntervalTest
     public void IntervalInitializingThrowsExpectedException(double left, double right) =>
         Assert.Throws<InadmissibleBoundsException<RealScalar>>(() =>
             new RealInterval(new RealScalar(left), new RealScalar(right)));
+    
+    [Theory]
+    [InlineData(6, 5)]
+    [InlineData(-1, -21)]
+    [InlineData(int.MaxValue, 0)]
+    public void IntegralIntervalInitializingThrowsExpectedException(int left, int right) =>
+        Assert.Throws<InadmissibleBoundsException<IntegerScalar>>(() =>
+            new IntegralInterval(new IntegerScalar(left), new IntegerScalar(right)));
 }

@@ -142,7 +142,7 @@ public sealed class IlpSolver(IlpSolverType solverType) : MemberwiseEquatable<Il
     {
         if (solverParameter.ExportModelFilePath is not null)
         {
-            File.WriteAllText(solverParameter.ExportModelFilePath, model.ExportToLpString(false));
+            File.WriteAllText(solverParameter.ExportModelFilePath, model.ExportToMpsString(false));
         }
     }
 }

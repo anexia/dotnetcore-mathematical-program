@@ -25,14 +25,14 @@ namespace Anexia.MathematicalProgram.Model;
 /// <typeparam name="TInterval">
 /// The scalar type associated with the variable and constraint intervals. This must implement IScalar.
 /// </typeparam>
-public readonly record struct CompletedOptimizationModel<TVariable, TCoefficient, TInterval> :
+public sealed record CompletedOptimizationModel<TVariable, TCoefficient, TInterval> :
     ICompletedOptimizationModel<TVariable, TCoefficient, TInterval>
     where TVariable : IVariable<TInterval>
     where TCoefficient : IAddableScalar<TCoefficient, TCoefficient>
     where TInterval : IAddableScalar<TInterval, TInterval>
 {
     internal CompletedOptimizationModel(IVariables<TVariable, TInterval> variables,
-        IEnumerable<IConstraint<TVariable, TCoefficient, TInterval>> constraints,
+        IReadOnlyCollection<IConstraint<TVariable, TCoefficient, TInterval>> constraints,
         IObjectiveFunction<TVariable, TCoefficient, TInterval> objectiveFunction)
     {
         Variables = variables;
@@ -48,12 +48,26 @@ public readonly record struct CompletedOptimizationModel<TVariable, TCoefficient
     /// <summary>
     /// The constraints.
     /// </summary>
-    public IEnumerable<IConstraint<TVariable, TCoefficient, TInterval>> Constraints { get; }
+    public IReadOnlyCollection<IConstraint<TVariable, TCoefficient, TInterval>> Constraints { get; }
 
     /// <summary>
     /// The objective function.
     /// </summary>
     public IObjectiveFunction<TVariable, TCoefficient, TInterval> ObjectiveFunction { get; }
+
+    public bool Equals(CompletedOptimizationModel<TVariable, TCoefficient, TInterval>? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Variables.SequenceEqual(other.Variables) &&
+               ObjectiveFunction.Equals(other.ObjectiveFunction) && Constraints.SequenceEqual(other.Constraints);
+    }
+
+    public override int GetHashCode() =>
+        Variables.Select(item => item.GetHashCode())
+            .Concat(Constraints.Select(item => item.GetHashCode()))
+            .Aggregate(ObjectiveFunction.GetHashCode(),
+                HashCode.Combine);
 
     [ExcludeFromCodeCoverage]
     public override string ToString() =>

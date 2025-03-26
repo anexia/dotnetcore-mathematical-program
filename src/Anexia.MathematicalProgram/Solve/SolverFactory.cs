@@ -42,6 +42,7 @@ public static class SolverFactory
         {
             LpSolverType.Glop => new LpSolver(solverType),
             LpSolverType.Scip => new LpSolver(solverType),
+            LpSolverType.GurobiMixedIntegerProgramming => new LpSolver(solverType),
             _ => throw new ArgumentOutOfRangeException(nameof(solverType), solverType, null)
         };
 
