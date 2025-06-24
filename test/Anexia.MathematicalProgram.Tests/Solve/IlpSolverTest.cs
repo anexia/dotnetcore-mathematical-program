@@ -5,14 +5,17 @@
 //  ------------------------------------------------------------------------------------------
 
 
-using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using Anexia.MathematicalProgram.Model;
+using Anexia.MathematicalProgram.Model.Expression;
 using Anexia.MathematicalProgram.Model.Scalar;
 using Anexia.MathematicalProgram.Model.Variable;
 using Anexia.MathematicalProgram.Result;
 using Anexia.MathematicalProgram.Solve;
 using Anexia.MathematicalProgram.SolverConfiguration;
+using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Extensions.Logging;
 using static Anexia.MathematicalProgram.Tests.Factory.IntervalFactory;
 using static Anexia.MathematicalProgram.Tests.Factory.SolutionValuesFactory;
 using static Anexia.MathematicalProgram.Tests.Factory.SolverResultFactory;
@@ -126,6 +129,46 @@ public sealed class IlpSolverTest
 
         var result = SolverFactory.SolverFor(IlpSolverType.Scip).Solve(optimizationModel,
             new SolverParameter());
+
+        Assert.Equal(
+            SolverResult(
+                new SolutionValues<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar>(
+                    ReadOnlyDictionary<IIntegerVariable<IRealScalar>, RealScalar>.Empty), null, new IsFeasible(false),
+                new IsOptimal(false), null,
+                SolverResultStatus.Unbounded, false), result);
+    }
+
+    [Fact]
+    public void SolverAdditionalLoggingWorks()
+    {
+        /*
+         * max 2x, x positive
+         */
+
+        var model = new OptimizationModel<IIntegerVariable<IRealScalar>, IRealScalar, IRealScalar>();
+        var x = model.NewVariable<IntegerVariable<IRealScalar>>(Interval(0, double.PositiveInfinity), "x");
+
+        var optimizationModel =
+            model.SetObjective(model.CreateObjectiveFunctionBuilder().AddTermToSum(new IntegerScalar(2), x)
+                .Build());
+
+        var logFile = "tmp.log";
+
+        var result = SolverFactory.SolverFor(IlpSolverType.Scip, null,
+            new SerilogLoggerFactory(new LoggerConfiguration().WriteTo
+                    .File(logFile, outputTemplate: "[{SourceContext}] [{Level:u4}] {Message}").CreateLogger())
+                .CreateLogger<IlpSolver>()).Solve(
+            optimizationModel,
+            new SolverParameter());
+
+        using (var streamReader = new StreamReader(logFile))
+        {
+            Assert.Equal(
+                "[Anexia.MathematicalProgram.Solve.IlpSolver] [INFO] Initialized Solver Scip with TimeLimit: \"unbounded\" and solver specific parameters \"\"",
+                streamReader.ReadToEnd());
+        }
+
+        File.Delete(logFile);
 
         Assert.Equal(
             SolverResult(

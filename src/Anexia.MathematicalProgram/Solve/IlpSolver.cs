@@ -1,22 +1,29 @@
+using System.Diagnostics;
 using Anexia.MathematicalProgram.Extensions;
 using Anexia.MathematicalProgram.Model;
-using Anexia.MathematicalProgram.Model.Expression;
 using Anexia.MathematicalProgram.Model.Interval;
 using Anexia.MathematicalProgram.Model.Scalar;
 using Anexia.MathematicalProgram.Model.Variable;
 using Anexia.MathematicalProgram.Result;
 using Anexia.MathematicalProgram.SolverConfiguration;
 using Google.OrTools.ModelBuilder;
+using Microsoft.Extensions.Logging;
 
 namespace Anexia.MathematicalProgram.Solve;
 
 /// <summary>
 /// Represents a solver for solving ILP problems.
 /// </summary>
-public sealed class IlpSolver(IlpSolverType solverType) : MemberwiseEquatable<IlpSolver>,
-    IOptimizationSolver<IIntegerVariable<IRealScalar>, IRealScalar, IRealScalar, RealScalar>
+public sealed class IlpSolver(
+    IlpSolverType solverType,
+    IlpSolverType? fallbackSolver = null,
+    ILogger<IlpSolver>? logger = null)
+    : MemberwiseEquatable<IlpSolver>,
+        IOptimizationSolver<IIntegerVariable<IRealScalar>, IRealScalar, IRealScalar, RealScalar>
 {
     private IlpSolverType SolverType { get; } = solverType;
+    private IlpSolverType FallbackSolver { get; } = fallbackSolver ?? IlpSolverType.HiGhs;
+    private ILogger<IlpSolver>? Logger { get; } = logger;
 
     /// <summary>
     /// Solves the given optimization model. Switches solver to SCIP, then the given type is not available.
@@ -68,7 +75,7 @@ public sealed class IlpSolver(IlpSolverType solverType) : MemberwiseEquatable<Il
     }
 
     /// <summary>
-    /// Solves the given model.
+    /// Solves the given model by minimizing the objective function.
     /// </summary>
     /// <param name="modelInMpsFormat">The model to be solved in MPS format.</param>
     /// <param name="solverParameter">Parameters to be passed to the underlying solver.</param>
@@ -121,9 +128,14 @@ public sealed class IlpSolver(IlpSolverType solverType) : MemberwiseEquatable<Il
 
         if (!configuredSolver.SolverIsSupported())
         {
-            configuredSolver = new Solver(IlpSolverType.Scip.ToEnumString());
+            Logger?.LogInformation(
+                "Desired Solver {SolverType} is not supported, switching to fallback solver {FallbackSolver}",
+                SolverType, FallbackSolver);
+            configuredSolver = new Solver(FallbackSolver.ToEnumString());
             solverWasSwitched = true;
         }
+
+        if (!configuredSolver.SolverIsSupported()) throw new SolverNotSupportedException(SolverType, FallbackSolver);
 
         if (solverParameter.TimeLimitInMilliseconds is not null)
             configuredSolver.SetTimeLimitInSeconds(solverParameter.TimeLimitInMilliseconds.AsSeconds);
@@ -131,18 +143,25 @@ public sealed class IlpSolver(IlpSolverType solverType) : MemberwiseEquatable<Il
         if (solverParameter.EnableSolverOutput.Value)
             configuredSolver.EnableOutput(true);
 
-        var solverTypeToUse = solverWasSwitched ? IlpSolverType.Scip : SolverType;
+        var solverTypeToUse = solverWasSwitched ? FallbackSolver : SolverType;
         var solverSpecificParameters = solverParameter.ToSolverSpecificParameters(solverTypeToUse);
         configuredSolver.SetSolverSpecificParameters(solverSpecificParameters);
+
+        Logger?.LogInformation(
+            "Initialized Solver {SolverType} with TimeLimit: {TimeLimit} and solver specific parameters {SolverSpecificParameters}",
+            SolverType,
+            solverParameter.TimeLimitInMilliseconds is null
+                ? "unbounded"
+                : solverParameter.TimeLimitInMilliseconds.Value + " ms",
+            solverSpecificParameters);
 
         return (configuredSolver, solverWasSwitched);
     }
 
     private void ExportModelIfRequested(SolverParameter solverParameter, Google.OrTools.ModelBuilder.Model model)
     {
-        if (solverParameter.ExportModelFilePath is not null)
-        {
-            File.WriteAllText(solverParameter.ExportModelFilePath, model.ExportToMpsString(false));
-        }
+        if (solverParameter.ExportModelFilePath is null) return;
+        Logger?.LogInformation("Exporting model to {ExportModelFilePath}", solverParameter.ExportModelFilePath);
+        model.WriteToMpsFile(solverParameter.ExportModelFilePath, false);
     }
 }

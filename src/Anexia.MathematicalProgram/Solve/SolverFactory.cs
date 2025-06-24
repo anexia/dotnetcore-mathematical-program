@@ -7,6 +7,7 @@
 using Anexia.MathematicalProgram.Model.Scalar;
 using Anexia.MathematicalProgram.Model.Variable;
 using Anexia.MathematicalProgram.SolverConfiguration;
+using Microsoft.Extensions.Logging;
 
 namespace Anexia.MathematicalProgram.Solve;
 
@@ -20,12 +21,13 @@ public static class SolverFactory
     /// <exception cref="ArgumentOutOfRangeException">Thrown when an unknown type is passed.</exception>
     public static
         IOptimizationSolver<IIntegerVariable<IRealScalar>, IRealScalar, IRealScalar, RealScalar>
-        SolverFor(IlpSolverType solverType) =>
+        SolverFor(IlpSolverType solverType, IlpSolverType? fallbackSolverType = null,
+            ILogger<IlpSolver>? logger = null) =>
         solverType switch
         {
             IlpSolverType.CbcIntegerProgramming => new IlpCbcSolver(),
             IlpSolverType.GurobiIntegerProgramming or
-                IlpSolverType.Scip or IlpSolverType.HiGhs => new IlpSolver(solverType),
+                IlpSolverType.Scip or IlpSolverType.HiGhs => new IlpSolver(solverType, fallbackSolverType, logger),
             _ => throw new ArgumentOutOfRangeException(nameof(solverType), solverType, null)
         };
 
