@@ -12,7 +12,7 @@ namespace Anexia.MathematicalProgram.Solve;
 /// An exception occured while solving a model.
 /// </summary>
 [ExcludeFromCodeCoverage]
-public sealed class MathematicalProgramException : Exception
+public class MathematicalProgramException : Exception
 {
     internal MathematicalProgramException(Exception exception)
         : base($"Error in solver: {exception.Message}, {exception.InnerException}", exception)

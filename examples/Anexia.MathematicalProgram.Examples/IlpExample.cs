@@ -5,6 +5,9 @@ using Anexia.MathematicalProgram.Model.Scalar;
 using Anexia.MathematicalProgram.Model.Variable;
 using Anexia.MathematicalProgram.Solve;
 using Anexia.MathematicalProgram.SolverConfiguration;
+using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Extensions.Logging;
 
 namespace Anexia.MathematicalProgram.Examples;
 
@@ -55,8 +58,14 @@ public static class IlpExample
 
 
         // Pass MPS model generated above to solver.
-        var resultFromModel = new IlpSolver(IlpSolverType.Scip).Solve(
-            new ModelAsMpsFormat(File.ReadAllText("model.txt")), new SolverParameter());
+        var resultFromModel =
+            new IlpSolver(IlpSolverType.GurobiIntegerProgramming, IlpSolverType.HiGhs,
+                new SerilogLoggerFactory(new LoggerConfiguration().WriteTo.Console().CreateLogger())
+                    .CreateLogger<IlpSolver>()).Solve(
+                new ModelAsMpsFormat(File.ReadAllText("model.txt")), new SolverParameter(
+                    new EnableSolverOutput(false),
+                    null,
+                    new TimeLimitInMilliseconds(10000)));
 
         // Prints same result as above.
         Console.WriteLine(resultFromModel);
