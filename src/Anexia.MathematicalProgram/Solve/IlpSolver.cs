@@ -38,6 +38,13 @@ public sealed class IlpSolver(
     {
         var (configuredSolver, solverWasSwitched) = InitializeSolver(solverParameter);
 
+        if (configuredSolver is null)
+        {
+            return FallbackSolver == IlpSolverType.CbcIntegerProgramming
+                ? new IlpCbcSolver().Solve(completedOptimizationModel, solverParameter)
+                : new SolverResult<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar>();
+        }
+
         var model = new Google.OrTools.ModelBuilder.Model();
 
         var variables = completedOptimizationModel.Variables.ToDictionary(
@@ -86,6 +93,9 @@ public sealed class IlpSolver(
     {
         var (configuredSolver, solverWasSwitched) = InitializeSolver(solverParameter);
 
+        if (configuredSolver is null)
+            throw new SolverNotSupportedException(SolverType, FallbackSolver);
+
         var model = new Google.OrTools.ModelBuilder.Model();
 
         model.ImportFromMpsString(modelInMpsFormat.Model);
@@ -121,7 +131,7 @@ public sealed class IlpSolver(
     public ISolverResult<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar> Solve(
         ModelAsMpsFormat modelInMpsFormat) => Solve(modelInMpsFormat, new SolverParameter());
 
-    private (Solver configuredSolver, bool solverWasSwitched) InitializeSolver(SolverParameter solverParameter)
+    private (Solver? configuredSolver, bool solverWasSwitched) InitializeSolver(SolverParameter solverParameter)
     {
         var configuredSolver = new Solver(SolverType.ToEnumString());
         var solverWasSwitched = false;
@@ -131,8 +141,13 @@ public sealed class IlpSolver(
             Logger?.LogInformation(
                 "Desired Solver {SolverType} is not supported, switching to fallback solver {FallbackSolver}",
                 SolverType, FallbackSolver);
-            configuredSolver = new Solver(FallbackSolver.ToEnumString());
+
             solverWasSwitched = true;
+
+            if (FallbackSolver == IlpSolverType.CbcIntegerProgramming)
+                return (null, true);
+
+            configuredSolver = new Solver(FallbackSolver.ToEnumString());
         }
 
         if (!configuredSolver.SolverIsSupported()) throw new SolverNotSupportedException(SolverType, FallbackSolver);
