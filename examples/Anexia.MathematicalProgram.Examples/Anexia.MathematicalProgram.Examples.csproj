@@ -8,6 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\src\Anexia.MathematicalProgram.MPaaS.Client\Anexia.MathematicalProgram.MPaaS.Client.csproj" />
+        <ProjectReference Include="..\..\src\Anexia.MathematicalProgram.MPaaS.Model\Anexia.MathematicalProgram.MPaaS.Model.csproj" />
         <ProjectReference Include="..\..\src\Anexia.MathematicalProgram\Anexia.MathematicalProgram.csproj"/>
     </ItemGroup>
 

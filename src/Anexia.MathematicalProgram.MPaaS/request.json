@@ -1,0 +1,1 @@
+{"Variables":[{"Name":"x","LowerBound":1,"UpperBound":3},{"Name":"y","LowerBound":0,"UpperBound":1}],"Constraints":[{"Terms":[{"Factor":-1,"Variable":"y"},{"Factor":1,"Variable":"x"}],"LowerBound":0,"UpperBound":1.7976931348623157E+308}],"Objective":{"Expression":[{"Factor":2,"Variable":"y"},{"Factor":2,"Variable":"x"}],"Maximize":false,"Offset":null},"SolverType":3}
