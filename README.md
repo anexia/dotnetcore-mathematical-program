@@ -2,7 +2,7 @@
 
 [![](https://img.shields.io/nuget/v/Anexia.MathematicalProgram "NuGet version badge")](https://www.nuget.org/packages/Anexia.MathematicalProgram)
 [![](https://github.com/anexia/dotnetcore-mathematical-program/actions/workflows/test.yml/badge.svg?branch=main "Test status")](https://github.com/anexia/dotnetcore-mathematical-program/actions/workflows/test.yml)
-[![codecov.io](https://codecov.io/github/Anexia/dotnetcore-mathematical-program/coverage.svg?branch=main "Code coverage")](https://codecov.io/github/Anexia/dotnetcore-mathematical-program/coverage.svg?branch=main)
+[![codecov.io](https://codecov.io/github/Anexia/dotnetcore-mathematical-program/coverage.svg?branch=main "Code coverage")](https://codecov.io/github/anexia/dotnetcore-mathematical-program/coverage.svg?branch=main)
 This library allows you to build and solve linear programs and integer linear programs in a very handy way.
 For linear programs, either [SCIP](https://www.scipopt.org/) or Google's [GLOP](https://developers.google.com/optimization/lp/lp_example) solver can be used.
 For integer linear programs, SCIP, Gurobi and the Coin-OR CBC branch and cut
@@ -66,6 +66,42 @@ var result = SolverFactory.SolverFor(IlpSolverType.Scip).Solve(optimizationModel
 
 Further detailed examples can be found in the [examples folder](examples).
 
+## Solver parameters (SolverParameter)
+
+You can control solver behavior using the SolverParameter record in Anexia.MathematicalProgram.SolverConfiguration. Common fields:
+
+- EnableSolverOutput: toggles solver console logs.
+- TimeLimitInMilliseconds: overall time limit.
+- NumberOfThreads: caps thread usage when supported by the solver.
+- RelativeGap: early stopping gap (when supported by the solver).
+- AdditionalSolverSpecificParameters: extra key/value pairs passed straight to the underlying solver.
+- ExportModelFilePath: path to export the model (MPS or solver-specific format depending on backend).
+
+Examples:
+
+Use with native Gurobi API (GurobiNativeSolver):
+```
+var native = new GurobiNativeSolver();
+var result = native.Solve(optimizationModel,
+    new SolverParameter(
+        new EnableSolverOutput(true),
+        NumberOfThreads: new NumberOfThreads(8),
+        RelativeGap: RelativeGap.EMinus7,
+        AdditionalSolverSpecificParameters: new[]
+        {
+            ("MIPFocus", "1"),
+            ("Heuristics", "0.05")
+        },
+        ExportModelFilePath: "model.mps"
+    )
+);
+```
+
+Notes:
+- For Gurobi parameters, see https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html#secparameterreference
+- The AdditionalSolverSpecificParameters are forwarded as-is.
+- NumberOfThreads, TimeLimitInMilliseconds, and RelativeGap is mapped to the solver’s native time limit.
+
 ## Contributing
 
 Contributions are welcomed! Read the [Contributing Guide](CONTRIBUTING.md) for more information.
@@ -73,6 +109,3 @@ Contributions are welcomed! Read the [Contributing Guide](CONTRIBUTING.md) for m
 ## Licensing
 
 This project is licensed under MIT License. See [LICENSE](LICENSE) for more information.
-
-
-

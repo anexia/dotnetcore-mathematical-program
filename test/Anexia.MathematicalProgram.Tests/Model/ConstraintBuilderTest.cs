@@ -59,6 +59,41 @@ public sealed class ConstraintBuilderTest
     }
 
     [Fact]
+    public void ConstraintBuilderAddExistingWeightedSumReturnsCorrectResult()
+    {
+        var model = new OptimizationModel<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar>();
+
+        var v1 = model.NewVariable<IntegerVariable<IRealScalar>>(new RealInterval(0, 1), "v1");
+        var v2 = model.NewVariable<IntegerVariable<IRealScalar>>(new RealInterval(0, 2), "v2");
+        var weightedSum = model.CreateWeightedSumBuilder()
+            .AddTermToSum(1, v1)
+            .AddTermToSum(2, v2)
+            .Build();
+
+        var constraint = model.CreateConstraintBuilder()
+            .AddTermToSum(3, v1)
+            .AddWeightedSum(weightedSum)
+            .Build(new IntegralInterval(-10, 20));
+
+        Assert.Equal(
+            Constraint(WeightedSum((v1, 4), (v2, 2)), Interval(-10, 20)),
+            constraint);
+    }
+
+    [Fact]
+    public void ConstraintBuilderBuildsEmptyConstraintWhenNoTermsWereAdded()
+    {
+        var model = new OptimizationModel<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar>();
+
+        var constraint = model.CreateConstraintBuilder()
+            .Build(new IntegralInterval(0, 0));
+
+        Assert.Empty(constraint.WeightedSum);
+        Assert.Equal(new IntegralInterval(0, 0), constraint.Interval);
+        Assert.Null(constraint.Name);
+    }
+
+    [Fact]
     public void AddWeightedSumThrowsCorrectException()
     {
         var model = new OptimizationModel<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar>();

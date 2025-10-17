@@ -24,5 +24,7 @@ public enum SolverResultStatus
     ModelInvalid,
     InvalidSolverParameters,
     SolverTypeUnavailable,
-    IncompatibleOptions
+    IncompatibleOptions,
+    InfOrUnbound,
+    Timelimit
 }

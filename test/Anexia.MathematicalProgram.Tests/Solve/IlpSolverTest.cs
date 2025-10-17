@@ -27,6 +27,87 @@ namespace Anexia.MathematicalProgram.Tests.Solve;
 public sealed class IlpSolverTest
 {
     [Fact]
+    public void SolveWithoutOrToolsThrowsForUnsupportedNativeSolver()
+    {
+        var optimizationModel = CreateSimpleOptimizationModel(out _);
+
+        var exception = Assert.Throws<NotImplementedException>(() =>
+            new IlpSolver(IlpSolverType.Scip).SolveWithoutORTools(
+                optimizationModel,
+                new SolverParameter()));
+
+        Assert.Equal("The specified type is not yet implemented. Use OR Tools for solving", exception.Message);
+    }
+
+    [Fact]
+    public void SolveWithUnsupportedSolverSwitchesToFallbackSolver()
+    {
+        var optimizationModel = CreateSimpleOptimizationModel(out var variable);
+        var logger = new FakeLogger();
+
+        var result = new IlpSolver((IlpSolverType)int.MaxValue, IlpSolverType.Scip, logger)
+            .Solve(optimizationModel, new SolverParameter(EnableSolverOutput.False));
+
+        Assert.Equal(
+            SolverResult(
+                SolutionValues<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar>(
+                    (variable, new RealScalar(1))),
+                new ObjectiveValue(2),
+                new IsFeasible(true),
+                new IsOptimal(true),
+                new OptimalityGap(0),
+                SolverResultStatus.Optimal,
+                true),
+            result);
+        Assert.Contains(logger.Messages, message => message.Contains("switching to fallback solver", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void SolveModelAsMpsFormatThrowsWhenSolverAndFallbackAreUnsupported()
+    {
+        var exception = Assert.Throws<SolverNotSupportedException>(() =>
+            new IlpSolver((IlpSolverType)int.MaxValue, (IlpSolverType)int.MaxValue)
+                .Solve(new ModelAsMpsFormat(string.Empty), new SolverParameter()));
+
+        Assert.Equal(
+            "Neither the expected solver 2147483647 nor fallback solver 2147483647 could be initialized.",
+            exception.Message);
+    }
+
+    [Fact]
+    public void SolveModelAsMpsFormatDefaultOverloadSolvesExportedModel()
+    {
+        var exportFilePath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.mps");
+        var optimizationModel = CreateSimpleOptimizationModel(out var variable);
+        var logger = new FakeLogger();
+
+        try
+        {
+            var exportedResult = new IlpSolver(IlpSolverType.Scip, logger: logger)
+                .Solve(optimizationModel, new SolverParameter(
+                    EnableSolverOutput.False,
+                    ExportModelFilePath: exportFilePath));
+
+            var resultFromMps = new IlpSolver(IlpSolverType.Scip)
+                .Solve(new ModelAsMpsFormat(File.ReadAllText(exportFilePath)));
+
+            Assert.True(File.Exists(exportFilePath));
+            Assert.Contains(logger.Messages, message => message.Contains("Exporting model to", StringComparison.Ordinal));
+            Assert.Equal(exportedResult.ObjectiveValue, resultFromMps.ObjectiveValue);
+            var solutionValue = Assert.IsAssignableFrom<
+                    IEnumerable<KeyValuePair<IIntegerVariable<IRealScalar>, RealScalar>>>(
+                    resultFromMps.SolutionValues)
+                .Single();
+            Assert.Equal(variable.Name, solutionValue.Key.Name);
+            Assert.Equal(new RealScalar(1), solutionValue.Value);
+        }
+        finally
+        {
+            if (File.Exists(exportFilePath)) File.Delete(exportFilePath);
+        }
+    }
+
+    [Fact]
     public void SolverWithSimpleFeasibleIlpModelReturnsCorrectResult()
     {
         /*
@@ -225,5 +306,35 @@ public sealed class IlpSolverTest
                     ReadOnlyDictionary<IIntegerVariable<IRealScalar>, RealScalar>.Empty), null, new IsFeasible(false),
                 new IsOptimal(false), null,
                 SolverResultStatus.Unbounded, false), result);
+    }
+
+    private static ICompletedOptimizationModel<IIntegerVariable<IRealScalar>, IRealScalar, IRealScalar>
+        CreateSimpleOptimizationModel(out IIntegerVariable<IRealScalar> variable)
+    {
+        var model =
+            new OptimizationModel<IIntegerVariable<IRealScalar>, IRealScalar, IRealScalar>();
+        variable = model.NewVariable<IntegerVariable<IRealScalar>>(Interval(1, 1), "TestVariable");
+
+        return model.SetObjective(
+            model.CreateObjectiveFunctionBuilder().AddTermToSum(new IntegerScalar(2), variable).Build(false));
+    }
+
+    private sealed class FakeLogger : ILogger<IlpSolver>
+    {
+        internal List<string> Messages { get; } = [];
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(
+            LogLevel logLevel,
+            EventId eventId,
+            TState state,
+            Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            Messages.Add(formatter(state, exception));
+        }
     }
 }
