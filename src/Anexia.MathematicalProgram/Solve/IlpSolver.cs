@@ -26,7 +26,7 @@ public sealed class IlpSolver(
     private ILogger<IlpSolver>? Logger { get; } = logger;
 
     /// <summary>
-    /// Solves the given optimization model. Switches solver to SCIP, then the given type is not available.
+    /// Solves the given optimization model. Switches solver to SCIP, when the given type is not available.
     /// </summary>
     /// <param name="completedOptimizationModel">The model to be solved.</param>
     /// <param name="solverParameter">Parameters to be passed to the underlying solver.</param>
@@ -87,6 +87,24 @@ public sealed class IlpSolver(
             solutionValues, configuredSolver.ObjectiveValue,
             configuredSolver.BestObjectiveBound);
     }
+
+    /// <summary>
+    /// Solves the given optimization model directly using the specified solver API. Switches solver to specified default solver, when the given type is not available.
+    /// </summary>
+    /// <param name="completedOptimizationModel">The model to be solved.</param>
+    /// <param name="solverParameter">Parameters to be passed to the underlying solver.</param>
+    /// <returns>Solver result containing solution information.</returns>
+    public ISolverResult<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar> SolveWithoutORTools(
+        ICompletedOptimizationModel<IIntegerVariable<IRealScalar>, IRealScalar, IRealScalar>
+            completedOptimizationModel,
+        SolverParameter solverParameter) =>
+        SolverType switch
+        {
+            IlpSolverType.GurobiIntegerProgramming => new GurobiNativeSolver().Solve(completedOptimizationModel,
+                solverParameter),
+            _ => throw new NotImplementedException(
+                "The specified type is not yet implemented. Use OR Tools for solving")
+        };
 
     /// <summary>
     /// Solves the given model by minimizing the objective function.

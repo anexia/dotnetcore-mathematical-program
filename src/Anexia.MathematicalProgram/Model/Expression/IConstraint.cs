@@ -23,4 +23,9 @@ public interface IConstraint<out TVariable, out TCoefficient, out TInterval> whe
     /// The constraint's interval.
     /// </summary>
     public IInterval<TInterval> Interval { get; }
+
+    /// <summary>
+    /// The constraint's name.
+    /// </summary>
+    public string? Name { get; }
 }
