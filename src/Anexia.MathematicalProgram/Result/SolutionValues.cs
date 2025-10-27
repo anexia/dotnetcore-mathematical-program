@@ -25,7 +25,7 @@ public sealed class SolutionValues<TVariable, TScalar, TVariableInterval> :
     where TVariable : IVariable<TVariableInterval>
     where TVariableInterval : IAddableScalar<TVariableInterval, TVariableInterval>
 {
-    internal SolutionValues(IReadOnlyDictionary<TVariable, TScalar> variablesMapping)
+    public SolutionValues(IReadOnlyDictionary<TVariable, TScalar> variablesMapping)
     {
         _variablesMapping = variablesMapping;
     }

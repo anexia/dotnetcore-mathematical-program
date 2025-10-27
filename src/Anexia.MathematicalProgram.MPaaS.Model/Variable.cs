@@ -1,13 +1,12 @@
 // ------------------------------------------------------------------------------------------
-//  <copyright file = "Program.cs" company = "ANEXIA® Internetdienstleistungs GmbH">
+//  <copyright file = "Variable.cs" company = "ANEXIA® Internetdienstleistungs GmbH">
 //  Copyright (c) ANEXIA® Internetdienstleistungs GmbH. All rights reserved.
 //  </copyright>
 // ------------------------------------------------------------------------------------------
 
+using System.Text.Json.Serialization;
 
-using Anexia.MathematicalProgram.Examples;
+namespace Anexia.MathematicalProgram.MPaaS.Model;
 
-IlpExample.Main();
-LpExample.Main();
-CpExample.Main();
-await MPaaSExamples.Main();
+[method: JsonConstructor]
+public record Variable(string Name, double? LowerBound, double? UpperBound);

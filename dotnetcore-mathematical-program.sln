@@ -11,6 +11,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Anexia.MathematicalProgram.Examples", "examples\Anexia.MathematicalProgram.Examples\Anexia.MathematicalProgram.Examples.csproj", "{E9938A0B-7D93-40C2-B25C-B1470EA846AE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Anexia.MathematicalProgram.MPaaS", "src\Anexia.MathematicalProgram.MPaaS\Anexia.MathematicalProgram.MPaaS.csproj", "{0CE48358-C7C0-4046-80DA-74C95033CA5C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Anexia.MathematicalProgram.MPaaS.Model", "src\Anexia.MathematicalProgram.MPaaS.Model\Anexia.MathematicalProgram.MPaaS.Model.csproj", "{97547818-EB8D-4CA7-AB1B-70519B4648D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Anexia.MathematicalProgram.MPaaS.Client", "src\Anexia.MathematicalProgram.MPaaS.Client\Anexia.MathematicalProgram.MPaaS.Client.csproj", "{C7F42B2F-D49B-4A7E-9FAA-4FB141AFCEDF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Anexia.MathematicalProgram.MPaaSBenchmark", "test\Anexia.MathematicalProgram.MPaaSBenchmark\Anexia.MathematicalProgram.MPaaSBenchmark.csproj", "{6FD84DC9-0882-4429-BC9A-604F5482971C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,5 +37,21 @@ Global
 		{E9938A0B-7D93-40C2-B25C-B1470EA846AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9938A0B-7D93-40C2-B25C-B1470EA846AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9938A0B-7D93-40C2-B25C-B1470EA846AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0CE48358-C7C0-4046-80DA-74C95033CA5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CE48358-C7C0-4046-80DA-74C95033CA5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0CE48358-C7C0-4046-80DA-74C95033CA5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0CE48358-C7C0-4046-80DA-74C95033CA5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97547818-EB8D-4CA7-AB1B-70519B4648D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97547818-EB8D-4CA7-AB1B-70519B4648D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97547818-EB8D-4CA7-AB1B-70519B4648D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97547818-EB8D-4CA7-AB1B-70519B4648D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7F42B2F-D49B-4A7E-9FAA-4FB141AFCEDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7F42B2F-D49B-4A7E-9FAA-4FB141AFCEDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7F42B2F-D49B-4A7E-9FAA-4FB141AFCEDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7F42B2F-D49B-4A7E-9FAA-4FB141AFCEDF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FD84DC9-0882-4429-BC9A-604F5482971C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FD84DC9-0882-4429-BC9A-604F5482971C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FD84DC9-0882-4429-BC9A-604F5482971C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FD84DC9-0882-4429-BC9A-604F5482971C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
