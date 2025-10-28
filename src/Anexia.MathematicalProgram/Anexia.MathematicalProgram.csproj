@@ -23,6 +23,7 @@
 
     <ItemGroup>
       <PackageReference Update="Google.OrTools" Version="9.14.6206" />
+      <PackageReference Include="Gurobi.Optimizer" Version="12.0.3" />
       <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.6" />
     </ItemGroup>
 

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added possibility to use Gurobi Solver directly via the API, not using Google OR-Tools.
+
+### Changed
+- Usage of AdditionalSolverParmateters. Changed list of string to list ob key-value pairs.
+
 ## [2.4.0] - 2025-10-01
 
 ### Added
