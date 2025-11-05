@@ -23,7 +23,7 @@
       <ProjectReference Include="..\Anexia.MathematicalProgram\Anexia.MathematicalProgram.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <None Include="..\README.md" Pack="true" PackagePath="\"/>
+        <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
     <ItemGroup>
