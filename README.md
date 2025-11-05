@@ -20,7 +20,7 @@ This library works for any linear program (LP), integer linear program (ILP) or 
 ### Anexia.MathematicalProgram.Result
 
 After solving the LP/ILP you get a `SolverResult` according to the `Google.OrTools.LinearSolver.Solver.ResultStatus`.
-The `SolverResult` containts following information:
+The `SolverResult` contains the following information:
 
 - **SolutionValues:** You can read out the actual values of the variables to transform the result correctly.
 - **ObjectiveValue:** Actual objective value. This value can be either the optimum, a deviation of the optimum
