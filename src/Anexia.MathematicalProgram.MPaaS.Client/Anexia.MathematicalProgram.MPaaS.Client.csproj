@@ -3,7 +3,19 @@
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
+        <AssemblyName>Anexia.MathematicalProgram.MPaaS.Client</AssemblyName>
+        <RootNamespace>Anexia.MathematicalProgram.MPaaS.Client</RootNamespace>
         <Nullable>enable</Nullable>
+        <PackRelease>true</PackRelease>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <PackageId>Anexia.MathematicalProgram.MPaaS.Client</PackageId>
+        <Authors>anexia</Authors> <!-- needs to match the NuGet profiles -->
+        <Company>Anexia Digital Engineering GmbH</Company>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/anexia/dotnetcore-mathematical-program/</PackageProjectUrl>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
