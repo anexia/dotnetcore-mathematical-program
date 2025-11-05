@@ -22,6 +22,9 @@
       <ProjectReference Include="..\Anexia.MathematicalProgram.MPaaS.Model\Anexia.MathematicalProgram.MPaaS.Model.csproj" />
       <ProjectReference Include="..\Anexia.MathematicalProgram\Anexia.MathematicalProgram.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <None Include="..\README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
 
     <ItemGroup>
       <PackageReference Remove="Google.OrTools" />
