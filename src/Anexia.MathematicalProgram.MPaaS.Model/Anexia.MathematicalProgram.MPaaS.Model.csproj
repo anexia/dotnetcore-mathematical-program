@@ -4,8 +4,25 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <AssemblyName>Anexia.MathematicalProgram.MPaaS.Client</AssemblyName>
+        <RootNamespace>Anexia.MathematicalProgram.MPaaS.Client</RootNamespace>
         <PackRelease>true</PackRelease>
     </PropertyGroup>
+
+    <PropertyGroup>
+        <PackageId>Anexia.MathematicalProgram.MPaaS.Model</PackageId>
+        <Authors>anexia,MLackenbucher</Authors> <!-- needs to match the NuGet profiles -->
+        <Company>Anexia Digital Engineering GmbH</Company>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/anexia/dotnetcore-mathematical-program/</PackageProjectUrl>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+
+
+    <ItemGroup>
+        <None Include="$(MSBuildProjectDirectory)/../../README.md" Pack="true" PackagePath="/"/>
+    </ItemGroup>
+
 
     <ItemGroup>
       <PackageReference Remove="Google.OrTools" />
