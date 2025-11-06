@@ -38,7 +38,7 @@ jobs:
 
       - name: Push
         run: |
-          dotnet nuget push Anexia.MathematicalProgram.${VERSION}.nupkg --skip-duplicate --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
+          dotnet nuget push Anexia.MathematicalProgram.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
           dotnet nuget push Anexia.MathematicalProgram.MPaaS.Client.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${Nuget_Client_Token}
         env:
           NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
