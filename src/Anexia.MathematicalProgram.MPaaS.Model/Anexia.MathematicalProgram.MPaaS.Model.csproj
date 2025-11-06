@@ -3,9 +3,9 @@
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
+        <AssemblyName>Anexia.MathematicalProgram.MPaaS.Model</AssemblyName>
+        <RootNamespace>Anexia.MathematicalProgram.MPaaS.Model</RootNamespace>
         <Nullable>enable</Nullable>
-        <AssemblyName>Anexia.MathematicalProgram.MPaaS.Client</AssemblyName>
-        <RootNamespace>Anexia.MathematicalProgram.MPaaS.Client</RootNamespace>
         <PackRelease>true</PackRelease>
     </PropertyGroup>
 
