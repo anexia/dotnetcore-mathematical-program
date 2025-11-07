@@ -7,9 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.6.4] - 2025-11-07
+
+### Fixed
+
+- Fixed bug where the objective was not correctly set when converting the MPaaS model to a CompletedOptimizationModel.
+
 ## [2.6.3] - 2025-11-06
 
 ### Added
+
 - Release MPaaS Client
 
 ## [2.4.0] - 2025-10-01

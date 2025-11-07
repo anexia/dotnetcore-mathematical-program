@@ -102,6 +102,6 @@ public static class ModelConverter
         return model.SetObjective(request.Objective.Expression.Aggregate(model.CreateObjectiveFunctionBuilder(),
                 (builder, expression) =>
                     builder.AddTermToSum(new RealScalar(expression.Coefficient), variables[expression.Variable]))
-            .Build(request.Objective.Maximize));
+            .Build(request.Objective.Maximize, request.Objective.Offset));
     }
 }
