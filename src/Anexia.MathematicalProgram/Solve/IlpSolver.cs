@@ -48,8 +48,15 @@ public sealed class IlpSolver(
         var model = new Google.OrTools.ModelBuilder.Model();
 
         var variables = completedOptimizationModel.Variables.ToDictionary(
-            item => item, item =>
-                model.NewIntVar(item.Interval.LowerBound.Value, item.Interval.UpperBound.Value, item.Name));
+            item => item, item => item switch
+            {
+                IntegerVariable<IRealScalar> or IntegerVariable<IIntegerScalar> or
+                    IntegerVariable<RealScalar> or IntegerVariable<IntegerScalar> => model.NewIntVar(
+                        item.Interval.LowerBound.Value,
+                        item.Interval.UpperBound.Value, item.Name),
+                BinaryVariable or IntegerVariable<IBinaryScalar> => model.NewBoolVar(item.Name),
+                _ => throw new ArgumentOutOfRangeException(nameof(item), item, "Variable type not supported.")
+            });
 
         foreach (var constraint in completedOptimizationModel.Constraints)
         {
