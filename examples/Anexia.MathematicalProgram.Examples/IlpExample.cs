@@ -24,10 +24,9 @@ public static class IlpExample
         // Create integer variable x in [1, 3]
         var x = model.NewVariable<IntegerVariable<IRealScalar>>(
             new IntegralInterval(new IntegerScalar(1), new IntegerScalar(3)), "x");
-
-        // Create integer variable y in [0, 1]
-        var y = model.NewVariable<IntegerVariable<IRealScalar>>(
-            new IntegralInterval(0, 1), "y");
+        
+        // Create binary variable y in [0, 1]
+        var y = model.NewBinaryVariable<BinaryVariable>("y");
 
         // Create weighted sum 1*x - 1*y from collections.
         var xMinusY = model.CreateWeightedSumBuilder()

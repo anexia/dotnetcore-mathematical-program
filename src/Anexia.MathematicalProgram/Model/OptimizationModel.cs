@@ -57,6 +57,27 @@ public sealed record
     }
 
     /// <summary>
+    /// Creates a new variable of type <see cref="TCreatedVariable"/> with name <paramref name="name"/>.
+    /// </summary>
+    /// <param name="name">The name</param>
+    /// <typeparam name="TCreatedVariable">The desired type of the variable that must implement<see>
+    ///         <cref>IBinaryVariable</cref>
+    ///     </see>
+    /// </typeparam>
+    /// <returns></returns>
+    /// <exception cref="VariableAlreadyExistsException{TInterval}">Thrown when a variable with the same name already exists.</exception>
+    public TCreatedVariable NewBinaryVariable<TCreatedVariable>(string name)
+        where TCreatedVariable : ICreatableVariable<TCreatedVariable, IBinaryScalar>, IBinaryVariable<IBinaryScalar>,
+        TVariable
+    {
+        var variable = TCreatedVariable.Create(new BinaryInterval(), name);
+        if (!_variables.Add(variable))
+            throw new VariableAlreadyExistsException<TInterval>(variable);
+
+        return variable;
+    }
+
+    /// <summary>
     /// Adds a new constraint to the model.
     /// </summary>
     /// <param name="constraint">The constraint to be added.</param>

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.7.0] - 2025-xx-xx
+
+### Added
+
+- Added possibility to create and use binary variables to the model.
+
 ## [2.6.4] - 2025-11-07
 
 ### Fixed
