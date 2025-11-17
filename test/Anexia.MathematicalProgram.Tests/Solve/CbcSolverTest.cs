@@ -26,7 +26,7 @@ public sealed class CbcSolverTest
     public void SolverWithSimpleFeasibleIlpModelReturnsCorrectResult()
     {
         /*
-         * min 2x, s.t. x=1, x binary
+         * min 2x, s.t. x=1, x integer
          */
 
         var model =
@@ -44,6 +44,33 @@ public sealed class CbcSolverTest
         Assert.Equal(
             SolverResult(
                 SolutionValues<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar>((v1, new RealScalar(1))),
+                new ObjectiveValue(2), new IsFeasible(true), new IsOptimal(true),
+                new OptimalityGap(0), SolverResultStatus.Optimal, false), result);
+    }
+
+    [Fact]
+    [Obsolete("Obsolete")]
+    public void SolverWithSimpleFeasibleIlpModelWithBinaryReturnsCorrectResult()
+    {
+        /*
+         * max 2x,x binary
+         */
+
+        var model =
+            new OptimizationModel<IIntegerVariable<IRealScalar>, IRealScalar, IRealScalar>();
+        var x = model.NewBinaryVariable<BinaryVariable>("TestVariable");
+
+
+        var optimizationModel =
+            model.SetObjective(
+                model.CreateObjectiveFunctionBuilder().AddTermToSum(new IntegerScalar(2), x).Build());
+
+        var result = SolverFactory.SolverFor(IlpSolverType.CbcIntegerProgramming).Solve(optimizationModel,
+            new SolverParameter(new EnableSolverOutput(true)));
+
+        Assert.Equal(
+            SolverResult(
+                SolutionValues<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar>((x, new RealScalar(1))),
                 new ObjectiveValue(2), new IsFeasible(true), new IsOptimal(true),
                 new OptimalityGap(0), SolverResultStatus.Optimal, false), result);
     }

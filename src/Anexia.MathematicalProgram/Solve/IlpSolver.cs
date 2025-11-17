@@ -48,8 +48,15 @@ public sealed class IlpSolver(
         var model = new Google.OrTools.ModelBuilder.Model();
 
         var variables = completedOptimizationModel.Variables.ToDictionary(
-            item => item, item =>
-                model.NewIntVar(item.Interval.LowerBound.Value, item.Interval.UpperBound.Value, item.Name));
+            item => item, item => item switch
+            {
+                IntegerVariable<IRealScalar> or IntegerVariable<IIntegerScalar> or
+                    IntegerVariable<RealScalar> or IntegerVariable<IntegerScalar> => model.NewIntVar(
+                        item.Interval.LowerBound.Value,
+                        item.Interval.UpperBound.Value, item.Name),
+                BinaryVariable or IntegerVariable<IBinaryScalar> => model.NewBoolVar(item.Name),
+                _ => throw new ArgumentOutOfRangeException(nameof(item), item, "Variable type not supported.")
+            });
 
         foreach (var constraint in completedOptimizationModel.Constraints)
         {
@@ -111,8 +118,12 @@ public sealed class IlpSolver(
         for (var i = 0; i < model.VariablesCount(); i++)
         {
             var variable = model.VarFromIndex(i);
-            variables.Add(new IntegerVariable<IRealScalar>(new RealInterval(variable.LowerBound, variable.UpperBound),
-                variable.Name), new RealScalar(configuredSolver.Value(variable)));
+            if (variable.LowerBound is 0 && variable.UpperBound is 1)
+                variables.Add(new BinaryVariable(variable.Name), new RealScalar(configuredSolver.Value(variable)));
+            else
+                variables.Add(new IntegerVariable<IRealScalar>(
+                    new RealInterval(variable.LowerBound, variable.UpperBound),
+                    variable.Name), new RealScalar(configuredSolver.Value(variable)));
         }
 
         var solutionValues =

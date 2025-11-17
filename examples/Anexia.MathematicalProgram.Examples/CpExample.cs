@@ -30,9 +30,8 @@ public static class CpExample
         var x = model.NewVariable<IntegerVariable<IIntegerScalar>>(
             new IntegralInterval(new IntegerScalar(1), new IntegerScalar(3)), "x");
 
-        // Create integer variable y in [0, 1]
-        var y = model.NewVariable<IntegerVariable<IIntegerScalar>>(
-            new IntegralInterval(0, 1), "y");
+        // Create binary variable y in [0, 1]
+        var y = model.NewBinaryVariable<BinaryVariable>("y");
 
         // Create constraint: 0 <= x + y <= 10
         var constraint = model.CreateConstraintBuilder().AddTermToSum(1, x)

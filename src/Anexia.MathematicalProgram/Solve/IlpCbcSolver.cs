@@ -32,8 +32,17 @@ public sealed class IlpCbcSolver : MemberwiseEquatable<IlpCbcSolver>,
             completedOptimizationModel,
         SolverParameter solverParameter)
     {
-        var variables = completedOptimizationModel.Variables.ToDictionary(item => item, item =>
-            Solver.MakeIntVar(item.Interval.LowerBound.Value, item.Interval.UpperBound.Value, item.Name));
+        var variables = completedOptimizationModel.Variables.ToDictionary(
+            item => item, item => item switch
+            {
+                IntegerVariable<IRealScalar> or IntegerVariable<IIntegerScalar> or
+                    IntegerVariable<RealScalar> or IntegerVariable<IntegerScalar> => Solver.MakeIntVar(
+                        item.Interval.LowerBound.Value,
+                        item.Interval.UpperBound.Value, item.Name),
+                BinaryVariable or IntegerVariable<IBinaryScalar> => Solver.MakeBoolVar(item.Name),
+                _ => throw new ArgumentOutOfRangeException(nameof(item), item, "Variable type not supported.")
+            });
+
 
         foreach (var constraint in completedOptimizationModel.Constraints)
         {
