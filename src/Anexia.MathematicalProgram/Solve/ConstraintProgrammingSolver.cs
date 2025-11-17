@@ -41,8 +41,15 @@ public sealed class ConstraintProgrammingSolver
         SolverParameter solverParameter, ICpSolutionCallback? solutionCallback, bool optimize = true)
     {
         var model = new CpModel();
-        var variables = completedOptimizationModel.Variables.ToDictionary(item => item, item =>
-            model.NewIntVar(item.Interval.LowerBound.Value, item.Interval.UpperBound.Value, item.Name));
+        var variables = completedOptimizationModel.Variables.ToDictionary(item => item,
+            item => item switch
+            {
+                IntegerVariable<IIntegerScalar> or IntegerVariable<IntegerScalar> => model.NewIntVar(
+                    item.Interval.LowerBound.Value,
+                    item.Interval.UpperBound.Value, item.Name),
+                BinaryVariable or IntegerVariable<IBinaryScalar> => model.NewBoolVar(item.Name),
+                _ => throw new ArgumentOutOfRangeException(nameof(item), item, "Variable type not supported.")
+            });
 
         foreach (var constraint in completedOptimizationModel.Constraints)
         {

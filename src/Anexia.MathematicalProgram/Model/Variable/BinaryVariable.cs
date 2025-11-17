@@ -13,7 +13,7 @@ namespace Anexia.MathematicalProgram.Model.Variable;
 /// <summary>
 /// Represents a binary variable in the domain {0,1}.
 /// </summary>
-public sealed class BinaryVariable : MemberwiseEquatable<BinaryVariable>,
+public record BinaryVariable :
     ICreatableVariable<BinaryVariable, IBinaryScalar>,
     IBinaryVariable<IBinaryScalar>
 {

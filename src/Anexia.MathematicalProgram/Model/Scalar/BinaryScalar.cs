@@ -34,23 +34,12 @@ public readonly record struct BinaryScalar : IBinaryScalar, IAddableScalar<Binar
     /// Initializes a new instance of <see cref="BinaryScalar"/>.
     /// </summary>
     /// <param name="isOne">True, sets the binary to 1, false to 0.</param>
-    public BinaryScalar(bool isOne)
+    private BinaryScalar(bool isOne)
     {
         IsOne = isOne;
     }
 
-    /// <summary>
-    /// Initializes a new instance of <see cref="BinaryScalar"/>.
-    /// </summary>
-    /// <param name="value">The value (must be 0 or 1).</param>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown when value is not 0 or 1.</exception>
-    internal BinaryScalar(long value)
-    {
-        if (value is not (0 or 1))
-            throw new ArgumentOutOfRangeException(nameof(value), value, "Binary scalar value must be 0 or 1.");
-        IsOne = value == 1;
-    }
-    
+
     /// <summary>
     /// The value represented as real scalar.
     /// </summary>
@@ -59,12 +48,12 @@ public readonly record struct BinaryScalar : IBinaryScalar, IAddableScalar<Binar
     /// <summary>
     /// Adds two binary scalars (Note: 1+1=0).
     /// </summary>
-    public BinaryScalar Add(BinaryScalar other) => new(Value ^ other.Value);
+    public BinaryScalar Add(BinaryScalar other) => new(IsOne ^ other.IsOne);
 
     /// <summary>
     /// Adds two binary scalars (Note: 1+1=0)
     /// </summary>
-    public IBinaryScalar Add(IBinaryScalar scalar) => new BinaryScalar(Value ^ scalar.Value);
+    public IBinaryScalar Add(IBinaryScalar scalar) => new BinaryScalar(IsOne ^ scalar.IsOne);
 
     /// <inheritdoc />
     public IRealScalar Add(IRealScalar other) => new RealScalar((Value + other.Value) % 2);
@@ -75,13 +64,18 @@ public readonly record struct BinaryScalar : IBinaryScalar, IAddableScalar<Binar
     /// <summary>
     /// Subtracts two binary scalars (Note: 0-1=1)
     /// </summary>
-    public BinaryScalar Subtract(BinaryScalar scalar) => new(Value ^ scalar.Value);
+    public BinaryScalar Subtract(BinaryScalar scalar) => new(IsOne ^ scalar.IsOne);
 
     /// <inheritdoc />
     public IRealScalar Subtract(IRealScalar scalar) => new RealScalar((Value + scalar.Value) % 2);
 
     /// <inheritdoc />
     public IIntegerScalar Subtract(IIntegerScalar scalar) => new IntegerScalar((Value + scalar.Value) % 2);
+
+    /// <summary>
+    /// Subtracts two binary scalars (Note: 0-1=1).
+    /// </summary>
+    public IBinaryScalar Subtract(IBinaryScalar scalar) => new BinaryScalar(IsOne ^ scalar.IsOne);
 
     /// <summary>
     /// Adds two binary scalars.
@@ -92,11 +86,6 @@ public readonly record struct BinaryScalar : IBinaryScalar, IAddableScalar<Binar
     /// Subtracts two binary scalars.
     /// </summary>
     public static BinaryScalar operator -(BinaryScalar left, BinaryScalar right) => left.Subtract(right);
-
-    /// <summary>
-    /// Subtracts two binary scalars (Note: 0-1=1).
-    /// </summary>
-    public IBinaryScalar Subtract(IBinaryScalar scalar) => new BinaryScalar(Value ^ scalar.Value);
 
     [ExcludeFromCodeCoverage]
     public override string ToString() => $"{Value:+#;-#;+0}";

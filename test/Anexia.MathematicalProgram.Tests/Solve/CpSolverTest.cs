@@ -50,6 +50,32 @@ public sealed class CpSolverTest
     }
 
     [Fact]
+    public void SolverWithSimpleFeasibleCpModelWithBinaryVariableReturnsCorrectResult()
+    {
+        /*
+         * max 2x, x binary
+         */
+
+        var model =
+            new OptimizationModel<IIntegerVariable<IIntegerScalar>, IIntegerScalar, IIntegerScalar>();
+        var x = model.NewBinaryVariable<BinaryVariable>("TestVariable");
+
+        var optimizationModel =
+            model.SetObjective(
+                model.CreateObjectiveFunctionBuilder().AddTermToSum(new IntegerScalar(2), x).Build(true));
+
+        var result = SolverFactory.NewCpSolver().Solve(optimizationModel,
+            new SolverParameter(new EnableSolverOutput(true)));
+
+        Assert.Equal(
+            SolverResult(
+                SolutionValues<IIntegerVariable<IIntegerScalar>, IntegerScalar, IIntegerScalar>(
+                    (x, new IntegerScalar(1))), new ObjectiveValue(2), new IsFeasible(true),
+                new IsOptimal(true), new OptimalityGap(0),
+                SolverResultStatus.Optimal, false), result);
+    }
+
+    [Fact]
     public void SolverWithInfeasibleIlModelReturnsCorrectResult()
     {
         //

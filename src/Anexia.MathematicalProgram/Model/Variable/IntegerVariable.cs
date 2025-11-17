@@ -14,7 +14,7 @@ namespace Anexia.MathematicalProgram.Model.Variable;
 /// Represents an integer variable.
 /// </summary>
 /// <typeparam name="TInterval">The variable's interval type.</typeparam>
-public sealed class IntegerVariable<TInterval> : MemberwiseEquatable<IntegerVariable<TInterval>>,
+public record IntegerVariable<TInterval> :
     ICreatableVariable<IntegerVariable<TInterval>, TInterval>,
     IIntegerVariable<TInterval> where TInterval : IAddableScalar<TInterval, TInterval>
 

@@ -8,6 +8,7 @@
 using System.Collections.ObjectModel;
 using Anexia.MathematicalProgram.Model;
 using Anexia.MathematicalProgram.Model.Expression;
+using Anexia.MathematicalProgram.Model.Interval;
 using Anexia.MathematicalProgram.Model.Scalar;
 using Anexia.MathematicalProgram.Model.Variable;
 using Anexia.MathematicalProgram.Result;
@@ -53,7 +54,55 @@ public sealed class IlpSolverTest
     }
 
     [Fact]
-    public void SolverFromModelReturnsCorrectResult()
+    public void SolverFromModelWithIntegerIntervalReturnsCorrectResult()
+    {
+        /*
+         * min 2x, s.t. x=1, x  integer [0,1]
+         */
+
+        var model =
+            new OptimizationModel<IIntegerVariable<IRealScalar>, IRealScalar, IRealScalar>();
+        var x = model.NewVariable<IntegerVariable<IRealScalar>>(Interval(1d, 1d), "TestVariable");
+
+        var optimizationModel =
+            model.SetObjective(
+                model.CreateObjectiveFunctionBuilder().AddTermToSum(new IntegerScalar(2), x).Build(false));
+
+        var result = SolverFactory.SolverFor(IlpSolverType.Scip).Solve(optimizationModel,
+            new SolverParameter(new EnableSolverOutput(true), ExportModelFilePath: "model.txt"));
+
+        var resultFromModel = new IlpSolver(IlpSolverType.Scip).Solve(
+            new ModelAsMpsFormat(File.ReadAllText("model.txt")), new SolverParameter(new EnableSolverOutput(true)));
+
+        Assert.Equal(result, resultFromModel);
+    }
+
+    [Fact]
+    public void SolverFromModelWithBinaryIntervalReturnsCorrectResult()
+    {
+        /*
+         * max 2x, x integer binary interval
+         */
+
+        var model =
+            new OptimizationModel<IIntegerVariable<IBinaryScalar>, IRealScalar, IBinaryScalar>();
+        var x = model.NewVariable<IntegerVariable<IBinaryScalar>>(new BinaryInterval(), "TestVariable");
+
+        var optimizationModel =
+            model.SetObjective(
+                model.CreateObjectiveFunctionBuilder().AddTermToSum(new IntegerScalar(2), x).Build());
+
+        var result = SolverFactory.SolverFor(IlpSolverType.Scip).Solve(optimizationModel,
+            new SolverParameter(new EnableSolverOutput(true), ExportModelFilePath: "model.txt"));
+
+        var resultFromModel = new IlpSolver(IlpSolverType.Scip).Solve(
+            new ModelAsMpsFormat(File.ReadAllText("model.txt")), new SolverParameter(new EnableSolverOutput(true)));
+
+        Assert.Equal(result.ObjectiveValue, resultFromModel.ObjectiveValue);
+    }
+
+    [Fact]
+    public void SolverFromModelWithBinaryVariableReturnsCorrectResult()
     {
         /*
          * min 2x, s.t. x=1, x binary
@@ -61,11 +110,11 @@ public sealed class IlpSolverTest
 
         var model =
             new OptimizationModel<IIntegerVariable<IRealScalar>, IRealScalar, IRealScalar>();
-        var v1 = model.NewVariable<IntegerVariable<IRealScalar>>(Interval(1d, 1d), "TestVariable");
+        var x = model.NewBinaryVariable<BinaryVariable>("TestVariable");
 
         var optimizationModel =
             model.SetObjective(
-                model.CreateObjectiveFunctionBuilder().AddTermToSum(new IntegerScalar(2), v1).Build(false));
+                model.CreateObjectiveFunctionBuilder().AddTermToSum(new IntegerScalar(2), x).Build(false));
 
         var result = SolverFactory.SolverFor(IlpSolverType.Scip).Solve(optimizationModel,
             new SolverParameter(new EnableSolverOutput(true), ExportModelFilePath: "model.txt"));

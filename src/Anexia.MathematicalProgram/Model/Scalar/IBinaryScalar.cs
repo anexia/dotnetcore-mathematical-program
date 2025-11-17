@@ -11,4 +11,5 @@ namespace Anexia.MathematicalProgram.Model.Scalar;
 /// </summary>
 public interface IBinaryScalar : IIntegerScalar, IAddableScalar<IBinaryScalar, IBinaryScalar>
 {
+    bool IsOne { get; }
 }

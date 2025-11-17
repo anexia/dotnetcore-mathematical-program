@@ -12,15 +12,15 @@ namespace Anexia.MathematicalProgram.Model.Interval;
 /// <summary>
 /// Represents a binary interval [0, 1] with integer bounds.
 /// </summary>
-public sealed class BinaryInterval : MemberwiseEquatable<BinaryInterval>, IInterval<IBinaryScalar>
+public record BinaryInterval : IInterval<IBinaryScalar>
 {
     /// <summary>
     /// Creates a binary interval with bounds [0,1].
     /// </summary>
     public BinaryInterval()
     {
-        LowerBound = new BinaryScalar(0);
-        UpperBound = new BinaryScalar(1);
+        LowerBound = BinaryScalar.Zero;
+        UpperBound = BinaryScalar.One;
     }
 
     /// <summary>

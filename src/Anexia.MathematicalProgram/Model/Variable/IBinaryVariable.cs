@@ -13,6 +13,4 @@ namespace Anexia.MathematicalProgram.Model.Variable;
 /// </summary>
 /// <typeparam name="TIntervalValue">The variable's interval scalar type.</typeparam>
 public interface IBinaryVariable<out TIntervalValue> : IIntegerVariable<TIntervalValue>
-    where TIntervalValue : IAddableScalar<TIntervalValue, TIntervalValue>
-{
-}
+    where TIntervalValue : IAddableScalar<TIntervalValue, TIntervalValue>;
