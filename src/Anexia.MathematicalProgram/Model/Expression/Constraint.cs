@@ -22,13 +22,14 @@ public readonly record struct
     IConstraint<TVariable, TVariableCoefficient, TInterval>
     where TVariable : IVariable<TInterval>
     where TInterval : IAddableScalar<TInterval, TInterval>
-    where TVariableCoefficient : IAddableScalar<TVariableCoefficient,TVariableCoefficient>
+    where TVariableCoefficient : IAddableScalar<TVariableCoefficient, TVariableCoefficient>
 {
     internal Constraint(IWeightedSum<TVariable, TVariableCoefficient, TInterval> weightedSum,
-        IInterval<TInterval> interval)
+        IInterval<TInterval> interval, string? name = null)
     {
         WeightedSum = weightedSum;
         Interval = interval;
+        Name = name;
     }
 
     /// <summary>
@@ -41,7 +42,13 @@ public readonly record struct
     /// </summary>
     public IInterval<TInterval> Interval { get; }
 
+    /// <summary>
+    /// The constraint's name.
+    /// </summary>
+    public string? Name { get; }
+
     /// <inheritdoc/>
     [ExcludeFromCodeCoverage]
-    public override string ToString() => $"{Interval.LowerBound} <= {WeightedSum} <= {Interval.UpperBound}";
+    public override string ToString() =>
+        $"{Name ?? ""}: {Interval.LowerBound} <= {WeightedSum} <= {Interval.UpperBound}";
 }
