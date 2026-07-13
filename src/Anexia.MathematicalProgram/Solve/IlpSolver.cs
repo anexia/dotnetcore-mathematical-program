@@ -26,7 +26,7 @@ public sealed class IlpSolver(
     private ILogger<IlpSolver>? Logger { get; } = logger;
 
     /// <summary>
-    /// Solves the given optimization model. Switches solver to SCIP, then the given type is not available.
+    /// Solves the given optimization model. Switches to the fallback solver (HiGHS by default) when the given type is not available.
     /// </summary>
     /// <param name="completedOptimizationModel">The model to be solved.</param>
     /// <param name="solverParameter">Parameters to be passed to the underlying solver.</param>
