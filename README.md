@@ -5,9 +5,10 @@
 [![codecov.io](https://codecov.io/github/Anexia/dotnetcore-mathematical-program/coverage.svg?branch=main "Code coverage")](https://codecov.io/github/Anexia/dotnetcore-mathematical-program/coverage.svg?branch=main)
 This library allows you to build and solve linear programs and integer linear programs in a very handy way.
 For linear programs, either [SCIP](https://www.scipopt.org/) or Google's [GLOP](https://developers.google.com/optimization/lp/lp_example) solver can be used.
-For integer linear programs, SCIP, Gurobi and the Coin-OR CBC branch and cut
-solver can be chosen. When the desired solver is not available, i.e., no licence for Gurobi could be found, SCIP is used
-as fallback. CBC Solver is marked deprecated, SCIP should be used instead.
+For integer linear programs, SCIP, Gurobi, [HiGHS](https://highs.dev/) and the Coin-OR CBC branch and cut
+solver can be chosen. When the desired solver is not available, i.e., no licence for Gurobi could be found, HiGHS is used
+as fallback by default. A different fallback solver can be specified via the `fallbackSolverType` parameter of
+`SolverFactory.SolverFor`. CBC Solver is marked deprecated, SCIP should be used instead.
 
 ## Installation
 
