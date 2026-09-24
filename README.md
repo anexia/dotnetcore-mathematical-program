@@ -102,6 +102,51 @@ Notes:
 - The AdditionalSolverSpecificParameters are forwarded as-is.
 - NumberOfThreads, TimeLimitInMilliseconds, and RelativeGap is mapped to the solver’s native time limit.
 
+## Warm start (MIP start) and variable hints
+
+A feasible (or partial) start solution can be attached to a completed model with `WithWarmStart`. The values are typed
+like the variable intervals (`IRealScalar` for ILP models), so integer, binary and real scalars are accepted.
+
+| Solver                                | Handling of the warm start                                        |
+|---------------------------------------|-------------------------------------------------------------------|
+| Gurobi (native, `GurobiNativeSolver`) | MIP start via the `Start` attribute                               |
+| Gurobi via OR-Tools                   | OR-Tools solution hint, forwarded to Gurobi as MIP start          |
+| SCIP                                  | OR-Tools solution hint, added as (partial) solution               |
+| CP-SAT                                | Solution hint                                                     |
+| HiGHS                                 | Ignored with a warning, see note below                            |
+| CBC                                   | Ignored                                                           |
+
+```
+var warmStart = new WarmStart<IIntegerVariable<IRealScalar>, IRealScalar>()
+    .Add(x, new IntegerScalar(1))
+    .Add(y, BinaryScalar.Zero);
+
+var result = SolverFactory.SolverFor(IlpSolverType.GurobiNativeIntegerProgramming)
+    .Solve(optimizationModel.WithWarmStart(warmStart), new SolverParameter());
+
+// Re-solve with the previous solution as start solution:
+var warmStartFromResult = ((SolutionValues<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar>)result.SolutionValues)
+    .ToWarmStart();
+```
+
+Note on HiGHS: OR-Tools (up to and including 9.14) sizes the hint arrays for HiGHS incorrectly and writes out of
+bounds, which crashes the process. Warm starts are therefore not forwarded to HiGHS, also when HiGHS is used as fallback.
+
+Solver specific per-variable attributes (Gurobi's `VarHintVal`, `VarHintPri` and `BranchPriority`) can be attached with
+`WithVariableAttributes`. They are applied by the native Gurobi solver only; all other solvers log and ignore them.
+
+```
+var attributes = new VariableAttributes<IIntegerVariable<IRealScalar>>()
+    .Add(x, VariableAttributeType.HintValue, 1)
+    .Add(x, VariableAttributeType.HintPriority, 5)
+    .Add(y, VariableAttributeType.BranchPriority, 10);
+
+var result = new GurobiNativeSolver().Solve(optimizationModel.WithVariableAttributes(attributes), new SolverParameter());
+```
+
+Both `WithWarmStart` and `WithVariableAttributes` throw a `VariableNotInModelException` when a referenced variable is not
+part of the model.
+
 ## Contributing
 
 Contributions are welcomed! Read the [Contributing Guide](CONTRIBUTING.md) for more information.

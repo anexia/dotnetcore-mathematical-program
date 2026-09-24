@@ -68,6 +68,14 @@ public sealed class ConstraintProgrammingSolver
             else model.Minimize(expr);
         }
 
+        if (completedOptimizationModel.WarmStart is not null)
+        {
+            foreach (var startValue in completedOptimizationModel.WarmStart)
+            {
+                model.AddHint(variables[startValue.Variable], startValue.Value.Value);
+            }
+        }
+
         if (solverParameter.ExportModelFilePaths.Any())
         {
             
