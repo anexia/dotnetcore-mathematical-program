@@ -40,7 +40,7 @@ public sealed class IlpSolver(
         {
             try
             {
-                return new GurobiNativeSolver().Solve(completedOptimizationModel,
+                return new GurobiNativeSolver(Logger).Solve(completedOptimizationModel,
                     solverParameter);
             }
             catch (MathematicalProgramException exception) when (exception.InnerException is GRBException)
@@ -90,6 +90,8 @@ public sealed class IlpSolver(
                            LinearExpr.Term(variables[term.Variable], term.Coefficient.Value))) +
                        LinearExpr.Constant(completedOptimizationModel.ObjectiveFunction.Offset?.Value ?? 0),
             completedOptimizationModel.ObjectiveFunction.Maximize);
+
+        ApplyWarmStart(completedOptimizationModel, model, variables, solverWasSwitched ? FallbackSolver : SolverType);
 
         ExportModelIfRequested(solverParameter, model);
 
@@ -202,6 +204,45 @@ public sealed class IlpSolver(
             solverSpecificParameters);
 
         return (configuredSolver, solverWasSwitched);
+    }
+
+    /// <summary>
+    /// Passes the warm start as solution hint to OR-Tools, which forwards it to the underlying solver
+    /// (MIP start for Gurobi, partial solution for SCIP). Variable attributes are only supported by the
+    /// native Gurobi solver and are therefore ignored.
+    /// </summary>
+    /// <remarks>
+    /// Hints are not passed to HiGHS: OR-Tools (up to and including 9.14) allocates the hint arrays for HiGHS with
+    /// the wrong size (<c>std::vector(0, num_hints)</c>) and writes out of bounds, which corrupts the heap and
+    /// crashes the process, see <c>ortools/linear_solver/proto_solver/highs_proto_solver.cc</c>.
+    /// </remarks>
+    private void ApplyWarmStart(
+        ICompletedOptimizationModel<IIntegerVariable<IRealScalar>, IRealScalar, IRealScalar> completedOptimizationModel,
+        Google.OrTools.ModelBuilder.Model model,
+        IReadOnlyDictionary<IIntegerVariable<IRealScalar>, Variable> variables,
+        IlpSolverType effectiveSolverType)
+    {
+        if (completedOptimizationModel.VariableAttributes is not null)
+        {
+            Logger?.LogWarning(
+                "Variable attributes are only supported by the native Gurobi solver, ignoring {Count} attributes",
+                completedOptimizationModel.VariableAttributes.Count);
+        }
+
+        if (completedOptimizationModel.WarmStart is null) return;
+
+        if (effectiveSolverType == IlpSolverType.HiGhs)
+        {
+            Logger?.LogWarning(
+                "Solution hints are not supported for HiGHS via OR-Tools, ignoring warm start for {Count} variables",
+                completedOptimizationModel.WarmStart.Count);
+            return;
+        }
+
+        Logger?.LogInformation("Setting solution hint for {Count} variables", completedOptimizationModel.WarmStart.Count);
+
+        foreach (var startValue in completedOptimizationModel.WarmStart)
+            model.AddHint(variables[startValue.Variable], startValue.Value.Value);
     }
 
     private void ExportModelIfRequested(SolverParameter solverParameter, Google.OrTools.ModelBuilder.Model model)

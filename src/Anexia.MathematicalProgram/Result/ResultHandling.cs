@@ -1,4 +1,4 @@
-﻿// ------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------
 //  <copyright file = "ResultHandling.cs" company = "ANEXIA® Internetdienstleistungs GmbH">
 //  Copyright (c) ANEXIA® Internetdienstleistungs GmbH.All rights reserved.
 //  </copyright>
@@ -141,8 +141,8 @@ internal static class ResultHandling
         {
             GRB.Status.OPTIMAL => SolverResult(SolverResultStatus.Optimal, false, solutionValues, objectiveValue,
                 bestBound, true, true),
-            GRB.Status.SUBOPTIMAL => SolverResult(SolverResultStatus.Feasible, false, solutionValues, objectiveValue,
-                bestBound, true),
+            GRB.Status.SUBOPTIMAL or GRB.Status.SOLUTION_LIMIT => SolverResult(SolverResultStatus.Feasible, false,
+                solutionValues, objectiveValue, bestBound, true),
             GRB.Status.TIME_LIMIT => SolverResult(SolverResultStatus.Timelimit, false, solutionValues, objectiveValue,
                 bestBound, true),
             GRB.Status.INTERRUPTED => SolverResult(SolverResultStatus.CancelledByUser, false, solutionValues,

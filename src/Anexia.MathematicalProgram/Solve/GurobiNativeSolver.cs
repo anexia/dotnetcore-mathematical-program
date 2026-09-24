@@ -5,6 +5,7 @@
 // ------------------------------------------------------------------------------------------
 
 using Anexia.MathematicalProgram.Model;
+using Anexia.MathematicalProgram.Model.Hint;
 using Anexia.MathematicalProgram.Model.Scalar;
 using Anexia.MathematicalProgram.Model.Variable;
 using Anexia.MathematicalProgram.Result;
@@ -79,6 +80,8 @@ public sealed class GurobiNativeSolver(
                         return expression;
                     }), model.ObjectiveFunction.Maximize ? GRB.MAXIMIZE : GRB.MINIMIZE);
 
+            ApplyWarmStartAndVariableAttributes(model, gurobiModel, variables);
+
 
             if (solverParameter.ExportModelFilePaths.Any())
             {
@@ -110,6 +113,48 @@ public sealed class GurobiNativeSolver(
         {
             logger?.LogError(exception, "An error occurred during solving the model: {EMessage}", exception.Message);
             throw new MathematicalProgramException(exception);
+        }
+    }
+
+    private void ApplyWarmStartAndVariableAttributes(
+        ICompletedOptimizationModel<IIntegerVariable<IRealScalar>, IRealScalar, IRealScalar> model,
+        GRBModel gurobiModel,
+        IReadOnlyDictionary<IIntegerVariable<IRealScalar>, GRBVar> variables)
+    {
+        if (model.WarmStart is null && model.VariableAttributes is null) return;
+
+        gurobiModel.Update();
+
+        if (model.WarmStart is not null)
+        {
+            logger?.LogInformation("Setting MIP start for {Count} variables", model.WarmStart.Count);
+
+            foreach (var startValue in model.WarmStart)
+                variables[startValue.Variable].Set(GRB.DoubleAttr.Start, startValue.Value.Value);
+        }
+
+        if (model.VariableAttributes is null) return;
+
+        logger?.LogInformation("Setting {Count} variable attributes", model.VariableAttributes.Count);
+
+        foreach (var attribute in model.VariableAttributes)
+        {
+            var variable = variables[attribute.Variable];
+            switch (attribute.Type)
+            {
+                case VariableAttributeType.HintValue:
+                    variable.Set(GRB.DoubleAttr.VarHintVal, attribute.Value);
+                    break;
+                case VariableAttributeType.HintPriority:
+                    variable.Set(GRB.IntAttr.VarHintPri, (int)attribute.Value);
+                    break;
+                case VariableAttributeType.BranchPriority:
+                    variable.Set(GRB.IntAttr.BranchPriority, (int)attribute.Value);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(model), attribute.Type,
+                        "Variable attribute type not supported.");
+            }
         }
     }
 }
