@@ -210,7 +210,7 @@ public sealed class GurobiNativeSolverTest
         Assert.Equal(
             SolverResult(
                 new SolutionValues<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar>(
-                    ReadOnlyDictionary<IIntegerVariable<IRealScalar>, RealScalar>.Empty), null, new IsFeasible(false),
+                    ReadOnlyDictionary<IIntegerVariable<IRealScalar>, RealScalar>.Empty), null, null,
                 new IsOptimal(false), null,
                 SolverResultStatus.Unbounded, false), result);
     }
