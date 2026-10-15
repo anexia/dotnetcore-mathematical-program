@@ -11,7 +11,7 @@ using Anexia.MathematicalProgram.Model.Variable;
 namespace Anexia.MathematicalProgram.Model.Hint;
 
 /// <summary>
-/// Represents the start value of a single variable within a <see cref="WarmStart{TVariable,TVariableInterval}"/>.
+/// Represents the start value of a single variable within a <see cref="StartSolution{TVariable,TVariableInterval}"/>.
 /// </summary>
 /// <param name="Variable">The variable.</param>
 /// <param name="Value">The value the variable should take in the start solution.</param>

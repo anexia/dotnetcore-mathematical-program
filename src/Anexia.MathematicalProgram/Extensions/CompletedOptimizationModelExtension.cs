@@ -16,25 +16,25 @@ public static class CompletedOptimizationModelExtension
 {
     /// <summary>
     /// Returns a copy of the model that passes the given start solution to the solver as warm start / MIP start.
-    /// The start solution may be partial. Replaces a previously set warm start.
+    /// The start solution may be partial. Replaces a previously set start solution.
     /// </summary>
     /// <param name="model">The model.</param>
-    /// <param name="warmStart">The start solution.</param>
-    /// <returns>A new model containing the warm start.</returns>
-    /// <exception cref="VariableNotInModelException{T}">Thrown when the warm start contains a variable that is not
+    /// <param name="startSolution">The (possibly partial) start solution.</param>
+    /// <returns>A new model containing the start solution.</returns>
+    /// <exception cref="VariableNotInModelException{T}">Thrown when the start solution contains a variable that is not
     /// part of the model.</exception>
-    public static ICompletedOptimizationModel<TVariable, TCoefficient, TIntervalScalar> WithWarmStart<TVariable,
+    public static ICompletedOptimizationModel<TVariable, TCoefficient, TIntervalScalar> WithHint<TVariable,
         TCoefficient, TIntervalScalar>(
         this ICompletedOptimizationModel<TVariable, TCoefficient, TIntervalScalar> model,
-        IWarmStart<TVariable, TIntervalScalar> warmStart)
+        IStartSolution<TVariable, TIntervalScalar> startSolution)
         where TVariable : IVariable<TIntervalScalar>
         where TCoefficient : IAddableScalar<TCoefficient, TCoefficient>
         where TIntervalScalar : IAddableScalar<TIntervalScalar, TIntervalScalar>
     {
-        EnsureVariablesArePartOfModel(model, warmStart.Select(startValue => startValue.Variable));
+        EnsureVariablesArePartOfModel(model, startSolution.Select(startValue => startValue.Variable));
 
         return new CompletedOptimizationModel<TVariable, TCoefficient, TIntervalScalar>(model.Variables,
-            model.Constraints, model.ObjectiveFunction, warmStart, model.VariableAttributes);
+            model.Constraints, model.ObjectiveFunction, startSolution, model.VariableAttributes);
     }
 
     /// <summary>
@@ -57,16 +57,16 @@ public static class CompletedOptimizationModelExtension
         EnsureVariablesArePartOfModel(model, variableAttributes.Select(attribute => attribute.Variable));
 
         return new CompletedOptimizationModel<TVariable, TCoefficient, TIntervalScalar>(model.Variables,
-            model.Constraints, model.ObjectiveFunction, model.WarmStart, variableAttributes);
+            model.Constraints, model.ObjectiveFunction, model.StartSolution, variableAttributes);
     }
 
     /// <summary>
-    /// Creates a warm start from the given solution values, e.g., to pass the solution of a previous run as start
+    /// Creates a start solution from the given solution values, e.g., to pass the solution of a previous run as start
     /// solution to the solver.
     /// </summary>
     /// <param name="solutionValues">The solution values of a previous solver run.</param>
-    /// <returns>Warm start containing all variables of the solution values.</returns>
-    public static WarmStart<TVariable, TIntervalScalar> ToWarmStart<TVariable, TScalar, TIntervalScalar>(
+    /// <returns>Start solution containing all variables of the solution values.</returns>
+    public static StartSolution<TVariable, TIntervalScalar> ToStartSolution<TVariable, TScalar, TIntervalScalar>(
         this SolutionValues<TVariable, TScalar, TIntervalScalar> solutionValues)
         where TVariable : IVariable<TIntervalScalar>
         where TScalar : TIntervalScalar

@@ -44,7 +44,7 @@ public static class ModelConverter
     public static GetSolutionResponse ToMPaaSSolution(
         this ISolverResult<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar> result,
         IEnumerable<IIntegerVariable<IRealScalar>> variables) => new(
-        result.IsFeasible.Value,
+        result.IsFeasible != null && result.IsFeasible.Value,
         result.OptimalityGap?.Value,
         result.ObjectiveValue?.Value,
         result.IsOptimal.Value,

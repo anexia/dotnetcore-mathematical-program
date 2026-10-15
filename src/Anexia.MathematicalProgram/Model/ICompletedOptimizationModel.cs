@@ -36,9 +36,9 @@ public interface ICompletedOptimizationModel<out TVariable, out TCoefficient, ou
 
     /// <summary>
     /// Optional start solution passed to the solver as warm start / MIP start, null when none is set.
-    /// Use <see cref="Extensions.CompletedOptimizationModelExtension.WithWarmStart{TVariable,TCoefficient,TVariableInterval}"/> to set one.
+    /// Use <see cref="Extensions.CompletedOptimizationModelExtension.WithHint{TVariable,TCoefficient,TVariableInterval}"/> to set one.
     /// </summary>
-    public IWarmStart<TVariable, TVariableInterval>? WarmStart { get; }
+    public IStartSolution<TVariable, TVariableInterval>? StartSolution { get; }
 
     /// <summary>
     /// Optional solver specific variable attributes, null when none are set. Only applied by the native Gurobi solver.

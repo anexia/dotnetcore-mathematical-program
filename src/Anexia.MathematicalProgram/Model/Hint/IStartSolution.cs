@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------------------------
-//  <copyright file = "IWarmStart.cs" company = "ANEXIA® Internetdienstleistungs GmbH">
+//  <copyright file = "IStartSolution.cs" company = "ANEXIA® Internetdienstleistungs GmbH">
 //  Copyright (c) ANEXIA® Internetdienstleistungs GmbH. All rights reserved.
 //  </copyright>
 // ------------------------------------------------------------------------------------------
@@ -22,7 +22,7 @@ namespace Anexia.MathematicalProgram.Model.Hint;
 /// </summary>
 /// <typeparam name="TVariable">The type of the variable.</typeparam>
 /// <typeparam name="TVariableInterval">The type of the variable interval's scalar, which is also the type of the start values.</typeparam>
-public interface IWarmStart<out TVariable, out TVariableInterval>
+public interface IStartSolution<out TVariable, out TVariableInterval>
     : IReadOnlyCollection<IStartValue<TVariable, TVariableInterval>>
     where TVariable : IVariable<TVariableInterval>
     where TVariableInterval : IAddableScalar<TVariableInterval, TVariableInterval>

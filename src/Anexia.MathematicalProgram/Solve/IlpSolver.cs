@@ -94,7 +94,7 @@ public sealed class IlpSolver(
                        LinearExpr.Constant(completedOptimizationModel.ObjectiveFunction.Offset?.Value ?? 0),
             completedOptimizationModel.ObjectiveFunction.Maximize);
 
-        ApplyWarmStart(completedOptimizationModel, model, variables, solverWasSwitched ? FallbackSolver : SolverType);
+        ApplyStartSolution(completedOptimizationModel, model, variables, solverWasSwitched ? FallbackSolver : SolverType);
 
         ExportModelIfRequested(solverParameter, model);
 
@@ -219,7 +219,7 @@ public sealed class IlpSolver(
     /// the wrong size (<c>std::vector(0, num_hints)</c>) and writes out of bounds, which corrupts the heap and
     /// crashes the process, see <c>ortools/linear_solver/proto_solver/highs_proto_solver.cc</c>.
     /// </remarks>
-    private void ApplyWarmStart(
+    private void ApplyStartSolution(
         ICompletedOptimizationModel<IIntegerVariable<IRealScalar>, IRealScalar, IRealScalar> completedOptimizationModel,
         Google.OrTools.ModelBuilder.Model model,
         IReadOnlyDictionary<IIntegerVariable<IRealScalar>, Variable> variables,
@@ -232,20 +232,20 @@ public sealed class IlpSolver(
                 completedOptimizationModel.VariableAttributes.Count);
         }
 
-        if (completedOptimizationModel.WarmStart is null) return;
+        if (completedOptimizationModel.StartSolution is null) return;
 
         if (effectiveSolverType == IlpSolverType.HiGhs)
         {
             Logger?.LogWarning(
                 "Solution hints are not supported for HiGHS via OR-Tools, ignoring warm start for {Count} variables",
-                completedOptimizationModel.WarmStart.Count);
+                completedOptimizationModel.StartSolution.Count);
             return;
         }
 
         Logger?.LogInformation("Setting solution hint for {Count} variables",
-            completedOptimizationModel.WarmStart.Count);
+            completedOptimizationModel.StartSolution.Count);
 
-        foreach (var startValue in completedOptimizationModel.WarmStart)
+        foreach (var startValue in completedOptimizationModel.StartSolution)
             model.AddHint(variables[startValue.Variable], startValue.Value.Value);
     }
 

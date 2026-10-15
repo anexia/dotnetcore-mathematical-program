@@ -9,7 +9,7 @@ namespace Anexia.MathematicalProgram.Model.Hint;
 /// <summary>
 /// Solver specific, per-variable attributes that guide the search. Currently only the native Gurobi solver
 /// applies these attributes, other solvers ignore them. For a start solution, use
-/// <see cref="IWarmStart{TVariable,TVariableInterval}"/> instead, which is supported by all solvers.
+/// <see cref="IStartSolution{TVariable,TVariableInterval}"/> instead, which is supported by all solvers.
 /// </summary>
 public enum VariableAttributeType
 {

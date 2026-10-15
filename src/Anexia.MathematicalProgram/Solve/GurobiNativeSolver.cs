@@ -80,7 +80,7 @@ public sealed class GurobiNativeSolver(
                         return expression;
                     }), model.ObjectiveFunction.Maximize ? GRB.MAXIMIZE : GRB.MINIMIZE);
 
-            ApplyWarmStartAndVariableAttributes(model, gurobiModel, variables);
+            ApplyStartSolutionAndVariableAttributes(model, gurobiModel, variables);
 
 
             if (solverParameter.ExportModelFilePaths.Any())
@@ -116,20 +116,20 @@ public sealed class GurobiNativeSolver(
         }
     }
 
-    private void ApplyWarmStartAndVariableAttributes(
+    private void ApplyStartSolutionAndVariableAttributes(
         ICompletedOptimizationModel<IIntegerVariable<IRealScalar>, IRealScalar, IRealScalar> model,
         GRBModel gurobiModel,
         IReadOnlyDictionary<IIntegerVariable<IRealScalar>, GRBVar> variables)
     {
-        if (model.WarmStart is null && model.VariableAttributes is null) return;
+        if (model.StartSolution is null && model.VariableAttributes is null) return;
 
         gurobiModel.Update();
 
-        if (model.WarmStart is not null)
+        if (model.StartSolution is not null)
         {
-            logger?.LogInformation("Setting MIP start for {Count} variables", model.WarmStart.Count);
+            logger?.LogInformation("Setting MIP start for {Count} variables", model.StartSolution.Count);
 
-            foreach (var startValue in model.WarmStart)
+            foreach (var startValue in model.StartSolution)
                 variables[startValue.Variable].Set(GRB.DoubleAttr.Start, startValue.Value.Value);
         }
 

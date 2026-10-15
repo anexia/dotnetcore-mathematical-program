@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------------------------
-//  <copyright file = "WarmStartTest.cs" company = "ANEXIA® Internetdienstleistungs GmbH">
+//  <copyright file = "StartSolutionTest.cs" company = "ANEXIA® Internetdienstleistungs GmbH">
 //  Copyright (c) ANEXIA® Internetdienstleistungs GmbH. All rights reserved.
 //  </copyright>
 // ------------------------------------------------------------------------------------------
@@ -11,7 +11,7 @@ using Anexia.MathematicalProgram.Model.Variable;
 
 namespace Anexia.MathematicalProgram.Tests.Model;
 
-public sealed class WarmStartTest
+public sealed class StartSolutionTest
 {
     private static readonly IIntegerVariable<IRealScalar> X =
         IntegerVariable<IRealScalar>.Create(new RealInterval(0, 3), "x");
@@ -19,14 +19,14 @@ public sealed class WarmStartTest
     private static readonly IIntegerVariable<IRealScalar> Y = new BinaryVariable("y");
 
     [Fact]
-    public void NewWarmStartIsEmpty() => Assert.True(new WarmStart<IIntegerVariable<IRealScalar>, IRealScalar>().Empty);
+    public void NewStartSolutionIsEmpty() => Assert.True(new StartSolution<IIntegerVariable<IRealScalar>, IRealScalar>().Empty);
 
     [Fact]
-    public void NewWarmStartHasNoStartValues() =>
-        Assert.Empty(new WarmStart<IIntegerVariable<IRealScalar>, IRealScalar>());
+    public void NewStartSolutionHasNoStartValues() =>
+        Assert.Empty(new StartSolution<IIntegerVariable<IRealScalar>, IRealScalar>());
 
     [Fact]
-    public void AddReturnsWarmStartWithOneStartValuePerVariable() => Assert.Equal(2, TwoStartValues().Count);
+    public void AddReturnsStartSolutionWithOneStartValuePerVariable() => Assert.Equal(2, TwoStartValues().Count);
 
     [Fact]
     public void AddedStartValueIsNotEmpty() => Assert.False(TwoStartValues().Empty);
@@ -53,13 +53,13 @@ public sealed class WarmStartTest
 
     [Fact]
     public void TryGetStartValueReturnsFalseForUnknownVariable() =>
-        Assert.False(new WarmStart<IIntegerVariable<IRealScalar>, IRealScalar>().Add(X, new IntegerScalar(2))
+        Assert.False(new StartSolution<IIntegerVariable<IRealScalar>, IRealScalar>().Add(X, new IntegerScalar(2))
             .TryGetStartValue(Y, out _));
 
     [Fact]
-    public void AddDoesNotModifyOriginalWarmStart()
+    public void AddDoesNotModifyOriginalStartSolution()
     {
-        var original = new WarmStart<IIntegerVariable<IRealScalar>, IRealScalar>();
+        var original = new StartSolution<IIntegerVariable<IRealScalar>, IRealScalar>();
 
         _ = original.Add(X, new IntegerScalar(2));
 
@@ -87,44 +87,44 @@ public sealed class WarmStartTest
             }, TwoStartValues().ToArray());
 
     [Fact]
-    public void WarmStartFromPairsEqualsWarmStartFromAdd() => Assert.Equal(TwoStartValues(), TwoStartValuesFromPairs());
+    public void StartSolutionFromPairsEqualsStartSolutionFromAdd() => Assert.Equal(TwoStartValues(), TwoStartValuesFromPairs());
 
     [Fact]
-    public void WarmStartFromPairsHasSameHashCodeAsWarmStartFromAdd() =>
+    public void StartSolutionFromPairsHasSameHashCodeAsStartSolutionFromAdd() =>
         Assert.Equal(TwoStartValues().GetHashCode(), TwoStartValuesFromPairs().GetHashCode());
 
     [Fact]
-    public void WarmStartsWithDifferentValuesAreNotEqual() =>
+    public void StartSolutionsWithDifferentValuesAreNotEqual() =>
         Assert.NotEqual(
-            new WarmStart<IIntegerVariable<IRealScalar>, IRealScalar>().Add(X, new IntegerScalar(2)),
-            new WarmStart<IIntegerVariable<IRealScalar>, IRealScalar>().Add(X, new IntegerScalar(3)));
+            new StartSolution<IIntegerVariable<IRealScalar>, IRealScalar>().Add(X, new IntegerScalar(2)),
+            new StartSolution<IIntegerVariable<IRealScalar>, IRealScalar>().Add(X, new IntegerScalar(3)));
 
     [Fact]
-    public void WarmStartsWithDifferentVariablesAreNotEqual() =>
+    public void StartSolutionsWithDifferentVariablesAreNotEqual() =>
         Assert.NotEqual(
-            new WarmStart<IIntegerVariable<IRealScalar>, IRealScalar>().Add(X, new IntegerScalar(1)),
-            new WarmStart<IIntegerVariable<IRealScalar>, IRealScalar>().Add(Y, new IntegerScalar(1)));
+            new StartSolution<IIntegerVariable<IRealScalar>, IRealScalar>().Add(X, new IntegerScalar(1)),
+            new StartSolution<IIntegerVariable<IRealScalar>, IRealScalar>().Add(Y, new IntegerScalar(1)));
 
     [Fact]
-    public void WarmStartIsNotEqualToNull() => Assert.False(TwoStartValues().Equals(null));
+    public void StartSolutionIsNotEqualToNull() => Assert.False(TwoStartValues().Equals(null));
 
     [Fact]
-    public void WarmStartIsNotEqualToOtherType() => Assert.False(TwoStartValues().Equals(new object()));
+    public void StartSolutionIsNotEqualToOtherType() => Assert.False(TwoStartValues().Equals(new object()));
 
-    private static WarmStart<IIntegerVariable<IRealScalar>, IRealScalar> TwoStartValues() =>
-        new WarmStart<IIntegerVariable<IRealScalar>, IRealScalar>()
+    private static StartSolution<IIntegerVariable<IRealScalar>, IRealScalar> TwoStartValues() =>
+        new StartSolution<IIntegerVariable<IRealScalar>, IRealScalar>()
             .Add(X, new IntegerScalar(2))
             .Add(Y, BinaryScalar.One);
 
-    private static WarmStart<IIntegerVariable<IRealScalar>, IRealScalar> TwoStartValuesFromPairs() =>
+    private static StartSolution<IIntegerVariable<IRealScalar>, IRealScalar> TwoStartValuesFromPairs() =>
         new(
         [
             new KeyValuePair<IIntegerVariable<IRealScalar>, IRealScalar>(Y, BinaryScalar.One),
             new KeyValuePair<IIntegerVariable<IRealScalar>, IRealScalar>(X, new IntegerScalar(2))
         ]);
 
-    private static WarmStart<IIntegerVariable<IRealScalar>, IRealScalar> SameVariableAddedTwice() =>
-        new WarmStart<IIntegerVariable<IRealScalar>, IRealScalar>()
+    private static StartSolution<IIntegerVariable<IRealScalar>, IRealScalar> SameVariableAddedTwice() =>
+        new StartSolution<IIntegerVariable<IRealScalar>, IRealScalar>()
             .Add(X, new IntegerScalar(2))
             .Add(X, new IntegerScalar(3));
 }

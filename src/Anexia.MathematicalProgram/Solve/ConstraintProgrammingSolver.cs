@@ -68,9 +68,9 @@ public sealed class ConstraintProgrammingSolver
             else model.Minimize(expr);
         }
 
-        if (completedOptimizationModel.WarmStart is not null)
+        if (completedOptimizationModel.StartSolution is not null)
         {
-            foreach (var startValue in completedOptimizationModel.WarmStart)
+            foreach (var startValue in completedOptimizationModel.StartSolution)
             {
                 model.AddHint(variables[startValue.Variable], startValue.Value.Value);
             }

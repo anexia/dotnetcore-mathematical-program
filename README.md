@@ -104,7 +104,7 @@ Notes:
 
 ## Warm start (MIP start) and variable hints
 
-A feasible (or partial) start solution can be attached to a completed model with `WithWarmStart`. The values are typed
+A feasible (or partial) start solution can be attached to a completed model with `WithHint`. The values are typed
 like the variable intervals (`IRealScalar` for ILP models), so integer, binary and real scalars are accepted.
 
 | Solver                                | Handling of the warm start                                        |
@@ -117,16 +117,16 @@ like the variable intervals (`IRealScalar` for ILP models), so integer, binary a
 | CBC                                   | Ignored                                                           |
 
 ```
-var warmStart = new WarmStart<IIntegerVariable<IRealScalar>, IRealScalar>()
+var startSolution = new StartSolution<IIntegerVariable<IRealScalar>, IRealScalar>()
     .Add(x, new IntegerScalar(1))
     .Add(y, BinaryScalar.Zero);
 
 var result = SolverFactory.SolverFor(IlpSolverType.GurobiNativeIntegerProgramming)
-    .Solve(optimizationModel.WithWarmStart(warmStart), new SolverParameter());
+    .Solve(optimizationModel.WithHint(startSolution), new SolverParameter());
 
 // Re-solve with the previous solution as start solution:
-var warmStartFromResult = ((SolutionValues<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar>)result.SolutionValues)
-    .ToWarmStart();
+var startSolutionFromResult = ((SolutionValues<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar>)result.SolutionValues)
+    .ToStartSolution();
 ```
 
 Note on HiGHS: OR-Tools (up to and including 9.14) sizes the hint arrays for HiGHS incorrectly and writes out of
@@ -144,7 +144,7 @@ var attributes = new VariableAttributes<IIntegerVariable<IRealScalar>>()
 var result = new GurobiNativeSolver().Solve(optimizationModel.WithVariableAttributes(attributes), new SolverParameter());
 ```
 
-Both `WithWarmStart` and `WithVariableAttributes` throw a `VariableNotInModelException` when a referenced variable is not
+Both `WithHint` and `WithVariableAttributes` throw a `VariableNotInModelException` when a referenced variable is not
 part of the model.
 
 ## Contributing

@@ -10,7 +10,7 @@ using Anexia.MathematicalProgram.Model.Variable;
 namespace Anexia.MathematicalProgram.Model.Hint;
 
 /// <summary>
-/// Represents the start value of a single variable within a <see cref="IWarmStart{TVariable,TVariableInterval}"/>.
+/// Represents the start value of a single variable within a <see cref="IStartSolution{TVariable,TVariableInterval}"/>.
 /// </summary>
 /// <typeparam name="TVariable">The type of the variable.</typeparam>
 /// <typeparam name="TVariableInterval">The type of the variable interval's scalar, which is also the type of the start value.</typeparam>

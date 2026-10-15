@@ -17,80 +17,80 @@ namespace Anexia.MathematicalProgram.Tests.Model;
 public sealed class CompletedOptimizationModelHintTest
 {
     [Fact]
-    public void CompletedModelHasNoWarmStartByDefault() => Assert.Null(CreateModel(out _, out _).WarmStart);
+    public void CompletedModelHasNoStartSolutionByDefault() => Assert.Null(CreateModel(out _, out _).StartSolution);
 
     [Fact]
     public void CompletedModelHasNoVariableAttributesByDefault() =>
         Assert.Null(CreateModel(out _, out _).VariableAttributes);
 
     [Fact]
-    public void WithWarmStartSetsWarmStart()
+    public void WithStartSolutionSetsStartSolution()
     {
         var model = CreateModel(out var x, out var y);
-        var warmStart = WarmStartFor(x, y);
+        var startSolution = StartSolutionFor(x, y);
 
-        Assert.Equal(warmStart, model.WithWarmStart(warmStart).WarmStart);
+        Assert.Equal(startSolution, model.WithHint(startSolution).StartSolution);
     }
 
     [Fact]
-    public void WithWarmStartLeavesVariableAttributesUnset()
+    public void WithStartSolutionLeavesVariableAttributesUnset()
     {
         var model = CreateModel(out var x, out var y);
 
-        Assert.Null(model.WithWarmStart(WarmStartFor(x, y)).VariableAttributes);
+        Assert.Null(model.WithHint(StartSolutionFor(x, y)).VariableAttributes);
     }
 
     [Fact]
-    public void WithWarmStartKeepsVariables()
+    public void WithStartSolutionKeepsVariables()
     {
         var model = CreateModel(out var x, out var y);
 
-        Assert.Equal(model.Variables, model.WithWarmStart(WarmStartFor(x, y)).Variables);
+        Assert.Equal(model.Variables, model.WithHint(StartSolutionFor(x, y)).Variables);
     }
 
     [Fact]
-    public void WithWarmStartKeepsConstraints()
+    public void WithStartSolutionKeepsConstraints()
     {
         var model = CreateModel(out var x, out var y);
 
-        Assert.Equal(model.Constraints, model.WithWarmStart(WarmStartFor(x, y)).Constraints);
+        Assert.Equal(model.Constraints, model.WithHint(StartSolutionFor(x, y)).Constraints);
     }
 
     [Fact]
-    public void WithWarmStartKeepsObjectiveFunction()
+    public void WithStartSolutionKeepsObjectiveFunction()
     {
         var model = CreateModel(out var x, out var y);
 
-        Assert.Equal(model.ObjectiveFunction, model.WithWarmStart(WarmStartFor(x, y)).ObjectiveFunction);
+        Assert.Equal(model.ObjectiveFunction, model.WithHint(StartSolutionFor(x, y)).ObjectiveFunction);
     }
 
     [Fact]
-    public void WithWarmStartDoesNotModifyOriginalModel()
+    public void WithStartSolutionDoesNotModifyOriginalModel()
     {
         var model = CreateModel(out var x, out var y);
 
-        _ = model.WithWarmStart(WarmStartFor(x, y));
+        _ = model.WithHint(StartSolutionFor(x, y));
 
-        Assert.Null(model.WarmStart);
+        Assert.Null(model.StartSolution);
     }
 
     [Fact]
-    public void WithWarmStartAcceptsPartialWarmStart()
+    public void WithStartSolutionAcceptsPartialStartSolution()
     {
         var model = CreateModel(out var x, out _);
-        var partialWarmStart = new WarmStart<IIntegerVariable<IRealScalar>, IRealScalar>().Add(x, new IntegerScalar(1));
+        var partialStartSolution = new StartSolution<IIntegerVariable<IRealScalar>, IRealScalar>().Add(x, new IntegerScalar(1));
 
-        Assert.Equal(partialWarmStart, model.WithWarmStart(partialWarmStart).WarmStart);
+        Assert.Equal(partialStartSolution, model.WithHint(partialStartSolution).StartSolution);
     }
 
     [Fact]
-    public void WithWarmStartThrowsWhenVariableIsNotPartOfModel()
+    public void WithStartSolutionThrowsWhenVariableIsNotPartOfModel()
     {
         var model = CreateModel(out _, out _);
-        var warmStart = new WarmStart<IIntegerVariable<IRealScalar>, IRealScalar>()
+        var startSolution = new StartSolution<IIntegerVariable<IRealScalar>, IRealScalar>()
             .Add(IntegerVariable<IRealScalar>.Create(new RealInterval(0, 1), "foreign"), new IntegerScalar(1));
 
-        Assert.Throws<VariableNotInModelException<IRealScalar>>(() => model.WithWarmStart(warmStart));
+        Assert.Throws<VariableNotInModelException<IRealScalar>>(() => model.WithHint(startSolution));
     }
 
     [Fact]
@@ -103,22 +103,22 @@ public sealed class CompletedOptimizationModelHintTest
     }
 
     [Fact]
-    public void WithVariableAttributesKeepsWarmStart()
+    public void WithVariableAttributesKeepsStartSolution()
     {
         var model = CreateModel(out var x, out var y);
-        var warmStart = WarmStartFor(x, y);
+        var startSolution = StartSolutionFor(x, y);
 
-        Assert.Equal(warmStart, model.WithWarmStart(warmStart).WithVariableAttributes(AttributesFor(y)).WarmStart);
+        Assert.Equal(startSolution, model.WithHint(startSolution).WithVariableAttributes(AttributesFor(y)).StartSolution);
     }
 
     [Fact]
-    public void WithWarmStartKeepsVariableAttributes()
+    public void WithStartSolutionKeepsVariableAttributes()
     {
         var model = CreateModel(out var x, out var y);
         var attributes = AttributesFor(y);
 
         Assert.Equal(attributes,
-            model.WithVariableAttributes(attributes).WithWarmStart(WarmStartFor(x, y)).VariableAttributes);
+            model.WithVariableAttributes(attributes).WithHint(StartSolutionFor(x, y)).VariableAttributes);
     }
 
     [Fact]
@@ -132,38 +132,38 @@ public sealed class CompletedOptimizationModelHintTest
     }
 
     [Fact]
-    public void ModelsWithSameWarmStartAreEqual()
+    public void ModelsWithSameStartSolutionAreEqual()
     {
-        var first = CreateModel(out var x1, out var y1).WithWarmStart(WarmStartFor(x1, y1));
-        var second = CreateModel(out var x2, out var y2).WithWarmStart(WarmStartFor(x2, y2));
+        var first = CreateModel(out var x1, out var y1).WithHint(StartSolutionFor(x1, y1));
+        var second = CreateModel(out var x2, out var y2).WithHint(StartSolutionFor(x2, y2));
 
         Assert.Equal(first, second);
     }
 
     [Fact]
-    public void ModelsWithSameWarmStartHaveSameHashCode()
+    public void ModelsWithSameStartSolutionHaveSameHashCode()
     {
-        var first = CreateModel(out var x1, out var y1).WithWarmStart(WarmStartFor(x1, y1));
-        var second = CreateModel(out var x2, out var y2).WithWarmStart(WarmStartFor(x2, y2));
+        var first = CreateModel(out var x1, out var y1).WithHint(StartSolutionFor(x1, y1));
+        var second = CreateModel(out var x2, out var y2).WithHint(StartSolutionFor(x2, y2));
 
         Assert.Equal(first.GetHashCode(), second.GetHashCode());
     }
 
     [Fact]
-    public void ModelWithWarmStartIsNotEqualToModelWithoutWarmStart()
+    public void ModelWithStartSolutionIsNotEqualToModelWithoutStartSolution()
     {
         var model = CreateModel(out var x, out var y);
 
-        Assert.NotEqual(model, model.WithWarmStart(WarmStartFor(x, y)));
+        Assert.NotEqual(model, model.WithHint(StartSolutionFor(x, y)));
     }
 
     [Fact]
-    public void ModelsWithDifferentWarmStartsAreNotEqual()
+    public void ModelsWithDifferentStartSolutionsAreNotEqual()
     {
         var model = CreateModel(out var x, out var y);
-        var otherWarmStart = new WarmStart<IIntegerVariable<IRealScalar>, IRealScalar>().Add(x, new IntegerScalar(2));
+        var otherStartSolution = new StartSolution<IIntegerVariable<IRealScalar>, IRealScalar>().Add(x, new IntegerScalar(2));
 
-        Assert.NotEqual(model.WithWarmStart(WarmStartFor(x, y)), model.WithWarmStart(otherWarmStart));
+        Assert.NotEqual(model.WithHint(StartSolutionFor(x, y)), model.WithHint(otherStartSolution));
     }
 
     [Fact]
@@ -175,20 +175,20 @@ public sealed class CompletedOptimizationModelHintTest
     }
 
     [Fact]
-    public void ToWarmStartContainsAllSolutionValues()
+    public void ToStartSolutionContainsAllSolutionValues()
     {
         _ = CreateModel(out var x, out var y);
         var solutionValues = SolutionValues<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar>(
             (x, new RealScalar(2)), (y, new RealScalar(1)));
 
         Assert.Equal(
-            new WarmStart<IIntegerVariable<IRealScalar>, IRealScalar>().Add(x, new RealScalar(2)).Add(y, new RealScalar(1)),
-            solutionValues.ToWarmStart());
+            new StartSolution<IIntegerVariable<IRealScalar>, IRealScalar>().Add(x, new RealScalar(2)).Add(y, new RealScalar(1)),
+            solutionValues.ToStartSolution());
     }
 
-    private static WarmStart<IIntegerVariable<IRealScalar>, IRealScalar> WarmStartFor(
+    private static StartSolution<IIntegerVariable<IRealScalar>, IRealScalar> StartSolutionFor(
         IIntegerVariable<IRealScalar> x, IIntegerVariable<IRealScalar> y) =>
-        new WarmStart<IIntegerVariable<IRealScalar>, IRealScalar>().Add(x, new IntegerScalar(1)).Add(y, BinaryScalar.Zero);
+        new StartSolution<IIntegerVariable<IRealScalar>, IRealScalar>().Add(x, new IntegerScalar(1)).Add(y, BinaryScalar.Zero);
 
     private static VariableAttributes<IIntegerVariable<IRealScalar>> AttributesFor(IIntegerVariable<IRealScalar> y) =>
         new VariableAttributes<IIntegerVariable<IRealScalar>>().Add(y, VariableAttributeType.BranchPriority, 3);

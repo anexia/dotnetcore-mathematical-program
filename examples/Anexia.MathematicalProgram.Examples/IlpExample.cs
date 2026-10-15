@@ -74,19 +74,19 @@ public static class IlpExample
         // Pass a feasible start solution (x = 2, y = 1) as warm start. The native Gurobi solver sets it as MIP start,
         // OR-Tools based solvers pass it as solution hint. Solver specific variable attributes (Gurobi only) can be
         // attached in the same way and are ignored by all other solvers.
-        var warmStart = new WarmStart<IIntegerVariable<IRealScalar>, IRealScalar>()
+        var startSolution = new StartSolution<IIntegerVariable<IRealScalar>, IRealScalar>()
             .Add(x, new IntegerScalar(2))
             .Add(y, BinaryScalar.One);
         var attributes = new VariableAttributes<IIntegerVariable<IRealScalar>>()
             .Add(x, VariableAttributeType.HintValue, 1)
             .Add(y, VariableAttributeType.BranchPriority, 10);
 
-        var resultWithWarmStart = SolverFactory.SolverFor(IlpSolverType.GurobiNativeIntegerProgramming, IlpSolverType.HiGhs)
-            .Solve(optimizationModel.WithWarmStart(warmStart).WithVariableAttributes(attributes),
+        var resultWithStartSolution = SolverFactory.SolverFor(IlpSolverType.GurobiNativeIntegerProgramming, IlpSolverType.HiGhs)
+            .Solve(optimizationModel.WithHint(startSolution).WithVariableAttributes(attributes),
                 new SolverParameter(new EnableSolverOutput(false)));
 
         // Prints same result as above.
-        Console.WriteLine(resultWithWarmStart);
+        Console.WriteLine(resultWithStartSolution);
 
         // Print optimization model
         Console.WriteLine(optimizationModel.ToString());

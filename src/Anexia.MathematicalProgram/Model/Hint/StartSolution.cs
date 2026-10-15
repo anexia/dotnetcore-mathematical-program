@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------------------------
-//  <copyright file = "WarmStart.cs" company = "ANEXIA® Internetdienstleistungs GmbH">
+//  <copyright file = "StartSolution.cs" company = "ANEXIA® Internetdienstleistungs GmbH">
 //  Copyright (c) ANEXIA® Internetdienstleistungs GmbH. All rights reserved.
 //  </copyright>
 // ------------------------------------------------------------------------------------------
@@ -13,37 +13,37 @@ using Anexia.MathematicalProgram.Model.Variable;
 namespace Anexia.MathematicalProgram.Model.Hint;
 
 /// <summary>
-/// Immutable start solution that is passed to the solver as warm start / MIP start.
-/// Use <see cref="Add"/> to create a new warm start containing an additional start value.
+/// Immutable (possibly partial) start solution that is passed to the solver as warm start / MIP start.
+/// Use <see cref="Add"/> to create a new start solution containing an additional start value.
 /// </summary>
 /// <typeparam name="TVariable">The type of the variable.</typeparam>
 /// <typeparam name="TVariableInterval">The type of the variable interval's scalar, which is also the type of the start values.</typeparam>
-public sealed class WarmStart<TVariable, TVariableInterval> : IWarmStart<TVariable, TVariableInterval>,
-    IEquatable<WarmStart<TVariable, TVariableInterval>>
+public sealed class StartSolution<TVariable, TVariableInterval> : IStartSolution<TVariable, TVariableInterval>,
+    IEquatable<StartSolution<TVariable, TVariableInterval>>
     where TVariable : IVariable<TVariableInterval>
     where TVariableInterval : IAddableScalar<TVariableInterval, TVariableInterval>
 {
     private readonly ImmutableDictionary<TVariable, TVariableInterval> _startValues;
 
     /// <summary>
-    /// Creates an empty warm start.
+    /// Creates an empty start solution.
     /// </summary>
-    public WarmStart() : this(ImmutableDictionary<TVariable, TVariableInterval>.Empty)
+    public StartSolution() : this(ImmutableDictionary<TVariable, TVariableInterval>.Empty)
     {
     }
 
     /// <summary>
-    /// Creates a warm start from the given variable-value pairs. When a variable occurs more than once,
+    /// Creates a start solution from the given variable-value pairs. When a variable occurs more than once,
     /// the last value wins.
     /// </summary>
     /// <param name="startValues">The start values.</param>
-    public WarmStart(IEnumerable<KeyValuePair<TVariable, TVariableInterval>> startValues)
+    public StartSolution(IEnumerable<KeyValuePair<TVariable, TVariableInterval>> startValues)
         : this(startValues.Aggregate(ImmutableDictionary<TVariable, TVariableInterval>.Empty,
             (current, pair) => current.SetItem(pair.Key, pair.Value)))
     {
     }
 
-    private WarmStart(ImmutableDictionary<TVariable, TVariableInterval> startValues)
+    private StartSolution(ImmutableDictionary<TVariable, TVariableInterval> startValues)
     {
         _startValues = startValues;
     }
@@ -59,13 +59,13 @@ public sealed class WarmStart<TVariable, TVariableInterval> : IWarmStart<TVariab
     public bool Empty => _startValues.Count == 0;
 
     /// <summary>
-    /// Returns a new warm start that additionally contains the given start value. When the variable already has a
+    /// Returns a new start solution that additionally contains the given start value. When the variable already has a
     /// start value, it is replaced.
     /// </summary>
     /// <param name="variable">The variable.</param>
     /// <param name="value">The value the variable should take in the start solution.</param>
-    /// <returns>A new warm start including the given start value.</returns>
-    public WarmStart<TVariable, TVariableInterval> Add(TVariable variable, TVariableInterval value) =>
+    /// <returns>A new start solution including the given start value.</returns>
+    public StartSolution<TVariable, TVariableInterval> Add(TVariable variable, TVariableInterval value) =>
         new(_startValues.SetItem(variable, value));
 
     /// <summary>
@@ -86,7 +86,7 @@ public sealed class WarmStart<TVariable, TVariableInterval> : IWarmStart<TVariab
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     /// <inheritdoc />
-    public bool Equals(WarmStart<TVariable, TVariableInterval>? other)
+    public bool Equals(StartSolution<TVariable, TVariableInterval>? other)
     {
         if (other is null) return false;
         if (ReferenceEquals(this, other)) return true;
@@ -97,7 +97,7 @@ public sealed class WarmStart<TVariable, TVariableInterval> : IWarmStart<TVariab
     }
 
     /// <inheritdoc />
-    public override bool Equals(object? obj) => Equals(obj as WarmStart<TVariable, TVariableInterval>);
+    public override bool Equals(object? obj) => Equals(obj as StartSolution<TVariable, TVariableInterval>);
 
     /// <inheritdoc />
     public override int GetHashCode() =>
