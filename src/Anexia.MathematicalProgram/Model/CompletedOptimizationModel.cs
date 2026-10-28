@@ -6,6 +6,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using Anexia.MathematicalProgram.Model.Expression;
+using Anexia.MathematicalProgram.Model.Hint;
 using Anexia.MathematicalProgram.Model.Scalar;
 using Anexia.MathematicalProgram.Model.Variable;
 
@@ -33,11 +34,15 @@ public sealed record CompletedOptimizationModel<TVariable, TCoefficient, TInterv
 {
     internal CompletedOptimizationModel(IVariables<TVariable, TInterval> variables,
         IReadOnlyCollection<IConstraint<TVariable, TCoefficient, TInterval>> constraints,
-        IObjectiveFunction<TVariable, TCoefficient, TInterval> objectiveFunction)
+        IObjectiveFunction<TVariable, TCoefficient, TInterval> objectiveFunction,
+        IStartSolution<TVariable, TInterval>? startSolution = null,
+        IVariableAttributes<TVariable>? variableAttributes = null)
     {
         Variables = variables;
         Constraints = constraints;
         ObjectiveFunction = objectiveFunction;
+        StartSolution = startSolution;
+        VariableAttributes = variableAttributes;
     }
 
     /// <summary>
@@ -55,21 +60,32 @@ public sealed record CompletedOptimizationModel<TVariable, TCoefficient, TInterv
     /// </summary>
     public IObjectiveFunction<TVariable, TCoefficient, TInterval> ObjectiveFunction { get; }
 
+    /// <summary>
+    /// The start solution passed to the solver as warm start, null when none is set.
+    /// </summary>
+    public IStartSolution<TVariable, TInterval>? StartSolution { get; }
+
+    /// <summary>
+    /// Solver specific variable attributes, null when none are set.
+    /// </summary>
+    public IVariableAttributes<TVariable>? VariableAttributes { get; }
+
     public bool Equals(CompletedOptimizationModel<TVariable, TCoefficient, TInterval>? other)
     {
         if (other is null) return false;
         if (ReferenceEquals(this, other)) return true;
         return Variables.SequenceEqual(other.Variables) &&
-               ObjectiveFunction.Equals(other.ObjectiveFunction) && Constraints.SequenceEqual(other.Constraints);
+               ObjectiveFunction.Equals(other.ObjectiveFunction) && Constraints.SequenceEqual(other.Constraints) &&
+               Equals(StartSolution, other.StartSolution) && Equals(VariableAttributes, other.VariableAttributes);
     }
 
     public override int GetHashCode() =>
         Variables.Select(item => item.GetHashCode())
             .Concat(Constraints.Select(item => item.GetHashCode()))
-            .Aggregate(ObjectiveFunction.GetHashCode(),
+            .Aggregate(HashCode.Combine(ObjectiveFunction, StartSolution, VariableAttributes),
                 HashCode.Combine);
 
     [ExcludeFromCodeCoverage]
     public override string ToString() =>
-        $"Variables: {Environment.NewLine} {string.Join(Environment.NewLine + " ", Variables)}{Environment.NewLine}Constraints: {Environment.NewLine} {string.Join(Environment.NewLine + " ", Constraints)}{Environment.NewLine}Objective function{Environment.NewLine} {ObjectiveFunction}";
+        $"Variables: {Environment.NewLine} {string.Join(Environment.NewLine + " ", Variables)}{Environment.NewLine}Constraints: {Environment.NewLine} {string.Join(Environment.NewLine + " ", Constraints)}{Environment.NewLine}Objective function{Environment.NewLine} {ObjectiveFunction}{(StartSolution is null ? "" : $"{Environment.NewLine}Start solution: {StartSolution}")}{(VariableAttributes is null ? "" : $"{Environment.NewLine}Variable attributes: {VariableAttributes}")}";
 }

@@ -7,7 +7,6 @@
 
 using System.Collections.ObjectModel;
 using Anexia.MathematicalProgram.Model;
-using Anexia.MathematicalProgram.Model.Expression;
 using Anexia.MathematicalProgram.Model.Interval;
 using Anexia.MathematicalProgram.Model.Scalar;
 using Anexia.MathematicalProgram.Model.Variable;
@@ -390,22 +389,26 @@ public sealed class IlpSolverTest
 
         var logFile = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.log");
 
-        var result = SolverFactory.SolverFor(IlpSolverType.Scip, null,
-            new SerilogLoggerFactory(new LoggerConfiguration().WriteTo
-                    .File(logFile, outputTemplate: "[{SourceContext}] [{Level:u4}] {Message}").CreateLogger())
-                .CreateLogger<IlpSolver>()).Solve(
-            optimizationModel,
-            new SolverParameter());
-
-        string logContent;
-        using (var streamReader = new StreamReader(logFile))
+        try
         {
-            logContent = streamReader.ReadToEnd();
+            ISolverResult<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar> result;
+
+            using (var loggerFactory = new SerilogLoggerFactory(
+                       new LoggerConfiguration().WriteTo
+                           .File(logFile, outputTemplate: "[{SourceContext}] [{Level:u4}] {Message}")
+                           .CreateLogger(),
+                       dispose: true))
+            {
+                result = SolverFactory.SolverFor(IlpSolverType.Scip, null, loggerFactory.CreateLogger<IlpSolver>())
+                    .Solve(optimizationModel, new SolverParameter());
+            }
+
+            return (result, File.ReadAllText(logFile));
         }
-
-        File.Delete(logFile);
-
-        return (result, logContent);
+        finally
+        {
+            if (File.Exists(logFile)) File.Delete(logFile);
+        }
     }
 
     private static SolverResult<IIntegerVariable<IRealScalar>, RealScalar, IRealScalar> UnboundedSolverResult() =>

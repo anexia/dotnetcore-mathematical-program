@@ -59,6 +59,12 @@ public sealed class LpSolver : MemberwiseEquatable<LpSolver>,
                        LinearExpr.Constant(completedOptimizationModel.ObjectiveFunction.Offset?.Value ?? 0),
             completedOptimizationModel.ObjectiveFunction.Maximize);
 
+        if (completedOptimizationModel.StartSolution is not null)
+        {
+            foreach (var startValue in completedOptimizationModel.StartSolution)
+                model.AddHint(variables[startValue.Variable], startValue.Value.Value);
+        }
+
         ExportModelIfRequested(solverParameter, model);
 
         var result = configuredSolver.Solve(model);

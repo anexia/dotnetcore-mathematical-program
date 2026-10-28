@@ -5,6 +5,7 @@
 // ------------------------------------------------------------------------------------------
 
 using Anexia.MathematicalProgram.Model.Expression;
+using Anexia.MathematicalProgram.Model.Hint;
 using Anexia.MathematicalProgram.Model.Scalar;
 using Anexia.MathematicalProgram.Model.Variable;
 
@@ -32,4 +33,16 @@ public interface ICompletedOptimizationModel<out TVariable, out TCoefficient, ou
     public IVariables<TVariable, TVariableInterval> Variables { get; }
     public IReadOnlyCollection<IConstraint<TVariable, TCoefficient, TVariableInterval>> Constraints { get; }
     public IObjectiveFunction<TVariable, TCoefficient, TVariableInterval> ObjectiveFunction { get; }
+
+    /// <summary>
+    /// Optional start solution passed to the solver as warm start / MIP start, null when none is set.
+    /// Use <see cref="Extensions.CompletedOptimizationModelExtension.WithHint{TVariable,TCoefficient,TVariableInterval}"/> to set one.
+    /// </summary>
+    public IStartSolution<TVariable, TVariableInterval>? StartSolution { get; }
+
+    /// <summary>
+    /// Optional solver specific variable attributes, null when none are set. Only applied by the native Gurobi solver.
+    /// Use <see cref="Extensions.CompletedOptimizationModelExtension.WithVariableAttributes{TVariable,TCoefficient,TVariableInterval}"/> to set them.
+    /// </summary>
+    public IVariableAttributes<TVariable>? VariableAttributes { get; }
 }
