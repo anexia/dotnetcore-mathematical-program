@@ -8,6 +8,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # enable GitHub OIDC token issuance for this job
     timeout-minutes: 5
     steps:
       - name: Checkout
@@ -37,11 +39,17 @@ jobs:
       - name: Pack
         run: dotnet pack --configuration Release /p:Version=${VERSION} --no-build --output .
 
+      - name: NuGet login (OIDC → temp API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
       - name: Push
         run: |
-          dotnet nuget push Anexia.MathematicalProgram.${VERSION}.nupkg --skip-duplicate --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
-          dotnet nuget push Anexia.MathematicalProgram.MPaaS.Client.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_CLIENT_TOKEN}
-          dotnet nuget push Anexia.MathematicalProgram.MPaaS.Model.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_CLIENT_TOKEN}
+          dotnet nuget push Anexia.MathematicalProgram.${VERSION}.nupkg --skip-duplicate --source https://api.nuget.org/v3/index.json --api-key ${steps.login.outputs.NUGET_API_KEY}}
+          dotnet nuget push Anexia.MathematicalProgram.MPaaS.Client.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${steps.login.outputs.NUGET_API_KEY}
+          dotnet nuget push Anexia.MathematicalProgram.MPaaS.Model.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${steps.login.outputs.NUGET_API_KEY}}
         env:
           NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
           NUGET_CLIENT_TOKEN: ${{ secrets.NUGET_CLIENT_TOKEN }}
