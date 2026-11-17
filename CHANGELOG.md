@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+# [2.11.0] - 2026-11-17
+
+### Changed
+- Updated Gurobi Version for GurobiNative Solver to 14.0.0.
+
 # [2.10.0] - 2026-10-28
 
 
