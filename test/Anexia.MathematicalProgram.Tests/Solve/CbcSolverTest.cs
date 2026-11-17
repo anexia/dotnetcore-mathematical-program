@@ -76,7 +76,7 @@ public sealed class CbcSolverTest
     }
 
     [Fact]
-    public void SolverWithSimpleFeasibleCpModelReturnsCorrectResult()
+    public void SolverSwitchesToDefaultWithoutGurobiLicence()
     {
         /*
          * min 2x, s.t. x=1, x binary
